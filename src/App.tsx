@@ -9,7 +9,9 @@ import { mockCategories, mockThreads } from './data/mockData';
 import { Thread } from './types/forum';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
 
+// ForumHome berisi logic App forum lama
 function ForumHome() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
@@ -23,10 +25,8 @@ function ForumHome() {
 
   const sortedThreads = useMemo(() => {
     return [...filteredThreads].sort((a, b) => {
-      // Pinned threads first
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
-      // Then by update time
       return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     });
   }, [filteredThreads]);
@@ -84,7 +84,6 @@ function ForumHome() {
         />
         <main className="flex-1 p-6">
           <div className="max-w-4xl mx-auto">
-            {/* Header */}
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 {selectedCategory 
@@ -99,8 +98,6 @@ function ForumHome() {
                 }
               </p>
             </div>
-
-            {/* Filter/Sort bar */}
             <div className="flex items-center justify-between mb-6 p-4 bg-white rounded-lg border border-gray-200">
               <div className="flex items-center space-x-4">
                 <select className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
@@ -120,8 +117,6 @@ function ForumHome() {
                 New Thread
               </button>
             </div>
-
-            {/* Threads */}
             <div className="space-y-4">
               {sortedThreads.length > 0 ? (
                 sortedThreads.map((thread) => (
@@ -157,7 +152,6 @@ function ForumHome() {
           </div>
         </main>
       </div>
-      {/* Sidebar overlay for mobile */}
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
@@ -173,12 +167,14 @@ function ForumHome() {
   );
 }
 
+// App utama: routing multi-halaman
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/" element={<ForumHome />} />
         {/* Redirect unknown routes to home */}
         <Route path="*" element={<Navigate to="/" />} />
