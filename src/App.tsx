@@ -10,6 +10,7 @@ import { Thread } from './types/forum';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import { useAuth } from './context/AuthContext';
 
 // ForumHome berisi logic App forum lama
 function ForumHome() {
@@ -130,7 +131,7 @@ function ForumHome() {
                 <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
                   <div className="text-gray-500 mb-4">
                     <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.982 3 14.536 3 13c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.[...]
                     </svg>
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No threads found</h3>
@@ -167,6 +168,13 @@ function ForumHome() {
   );
 }
 
+// Proteksi halaman dashboard (hanya bisa diakses jika sudah login)
+function ProtectedDashboard() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" />;
+  return <Dashboard />;
+}
+
 // App utama: routing multi-halaman
 function App() {
   return (
@@ -174,7 +182,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<ProtectedDashboard />} />
         <Route path="/" element={<ForumHome />} />
         {/* Redirect unknown routes to home */}
         <Route path="*" element={<Navigate to="/" />} />
