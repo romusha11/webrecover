@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Bell, User, Menu, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -21,7 +22,6 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
             >
               <Menu size={24} />
             </button>
-            
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-700 to-purple-700 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">EW</span>
@@ -46,6 +46,21 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
 
           {/* Right section */}
           <div className="flex items-center space-x-4">
+            {/* Tombol Login dan Register */}
+            <Link
+              to="/login"
+              className="px-4 py-2 rounded-lg text-blue-600 font-semibold hover:bg-blue-50 transition"
+            >
+              Login
+            </Link>
+            <Link
+              to="/register"
+              className="px-4 py-2 rounded-lg text-white bg-blue-600 font-semibold hover:bg-blue-700 transition"
+            >
+              Register
+            </Link>
+
+            {/* New Thread */}
             <button
               onClick={onCreateThread}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
@@ -53,7 +68,8 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
               <Plus size={16} />
               <span className="hidden sm:inline">New Thread</span>
             </button>
-            
+
+            {/* Notifikasi */}
             <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors relative">
               <Bell size={20} />
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -61,6 +77,7 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
               </span>
             </button>
             
+            {/* Avatar User */}
             <div className="flex items-center space-x-2">
               <img
                 src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&crop=face"
