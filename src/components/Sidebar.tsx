@@ -1,6 +1,8 @@
 import React from 'react';
-import { MessageSquare, Code, Smartphone, Palette, Briefcase, Home, TrendingUp, Users } from 'lucide-react';
+import { MessageSquare, Code, Smartphone, Palette, Briefcase, Home, TrendingUp, Users, LayoutDashboard } from 'lucide-react';
 import { Category } from '../types/forum';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface SidebarProps {
   categories: Category[];
@@ -18,11 +20,25 @@ const iconMap = {
 };
 
 export default function Sidebar({ categories, selectedCategory, onCategorySelect, isOpen }: SidebarProps) {
+  const { user } = useAuth();
+
   return (
     <aside className={`fixed md:static inset-y-0 left-0 z-40 w-64 bg-gray-50 border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
       <div className="h-full overflow-y-auto p-4">
         {/* Navigation */}
         <nav className="space-y-2 mb-8">
+          {/* Dashboard button (only if user login) */}
+          {user && (
+            <Link
+              to="/dashboard"
+              className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors text-blue-700 bg-blue-100 border-blue-200 font-medium"
+              style={{ marginBottom: "8px" }}
+            >
+              <LayoutDashboard size={20} />
+              <span>Dashboard</span>
+            </Link>
+          )}
+
           <button
             onClick={() => onCategorySelect(null)}
             className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
@@ -104,4 +120,4 @@ export default function Sidebar({ categories, selectedCategory, onCategorySelect
       </div>
     </aside>
   );
-}
+                      }
