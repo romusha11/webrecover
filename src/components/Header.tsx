@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Bell, User, Menu, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -9,6 +10,13 @@ interface HeaderProps {
 
 export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -46,19 +54,32 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
 
           {/* Right section */}
           <div className="flex items-center space-x-4">
-            {/* Tombol Login dan Register */}
-            <Link
-              to="/login"
-              className="px-4 py-2 rounded-lg text-blue-600 font-semibold hover:bg-blue-50 transition"
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="px-4 py-2 rounded-lg text-white bg-blue-600 font-semibold hover:bg-blue-700 transition"
-            >
-              Register
-            </Link>
+            {!user ? (
+              <>
+                <Link
+                  to="/login"
+                  className="px-4 py-2 rounded-lg text-blue-600 font-semibold hover:bg-blue-50 transition"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="px-4 py-2 rounded-lg text-white bg-blue-600 font-semibold hover:bg-blue-700 transition"
+                >
+                  Register
+                </Link>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 rounded-lg text-white bg-red-600 font-semibold hover:bg-red-700 transition"
+                >
+                  Logout
+                </button>
+                <span className="font-medium text-gray-900">{user.name}</span>
+              </>
+            )}
 
             {/* New Thread */}
             <button
@@ -84,7 +105,7 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
                 alt="User avatar"
                 className="w-8 h-8 rounded-full"
               />
-              <span className="hidden sm:inline font-medium text-gray-900">TechGuru</span>
+              {user && <span className="hidden sm:inline font-medium text-gray-900">{user.name}</span>}
             </div>
           </div>
         </div>
