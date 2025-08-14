@@ -1,10 +1,24 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const AuthContext = createContext(null);
+interface User {
+  name: string;
+  email: string;
+}
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    // Coba ambil user dari localStorage saat pertama kali load
+interface AuthContextType {
+  user: User | null;
+  login: (userData: User) => void;
+  logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  login: () => {},
+  logout: () => {},
+});
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
@@ -14,7 +28,7 @@ export function AuthProvider({ children }) {
     else localStorage.removeItem("user");
   }, [user]);
 
-  const login = (userData) => setUser(userData);
+  const login = (userData: User) => setUser(userData);
   const logout = () => setUser(null);
 
   return (
