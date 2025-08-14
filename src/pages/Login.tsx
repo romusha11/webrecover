@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validasi sederhana
     if (!email || !password) {
       setError('Email dan password wajib diisi!');
       return;
     }
-
-    // TODO: Integrasi ke backend/Supabase di tahap berikut
+    // Dummy login
+    login({ name: "TechGuru", email });
     setError('');
-    alert('Login berhasil (dummy)');
+    navigate('/dashboard');
   };
 
   return (
@@ -27,29 +29,13 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
-            <input
-              type="email"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              autoFocus
-            />
+            <input type="email" className="w-full border border-gray-300 rounded-lg px-3 py-2" value={email} onChange={e => setEmail(e.target.value)} required autoFocus />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Password</label>
-            <input
-              type="password"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-            />
+            <input type="password" className="w-full border border-gray-300 rounded-lg px-3 py-2" value={password} onChange={e => setPassword(e.target.value)} required />
           </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded-lg font-semibold transition-colors"
-          >
+          <button type="submit" className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded-lg font-semibold transition-colors">
             Login
           </button>
         </form>
@@ -59,4 +45,4 @@ export default function Login() {
       </div>
     </div>
   );
-}
+            }
