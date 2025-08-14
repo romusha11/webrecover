@@ -30,7 +30,7 @@ export default function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-center text-blue-700">Register - Ethereum Work</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center text-blue-700">Register - Romusha</h2>
         {error && <div className="text-red-600 mb-4">{error}</div>}
         {success && <div className="text-green-600 mb-4">{success}</div>}
         <form onSubmit={handleSubmit} className="space-y-4">

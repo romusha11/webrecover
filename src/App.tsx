@@ -10,9 +10,12 @@ import { Thread } from './types/forum';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import AdminPanel from './pages/AdminPanel';
+import MyActivity from './pages/MyActivity';
 import { useAuth } from './context/AuthContext';
 
-// Proteksi route dashboard
+// Proteksi route dashboard & profile
 function ProtectedRoute({ redirect = "/login" }) {
   const { user } = useAuth();
   return user ? <Outlet /> : <Navigate to={redirect} />;
@@ -189,6 +192,9 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/my-activity" element={<MyActivity />} />
         </Route>
         <Route path="/" element={<ForumHome />} />
         <Route path="*" element={<Navigate to="/" />} />

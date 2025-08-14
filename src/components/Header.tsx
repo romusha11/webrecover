@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Bell, User, Menu, Plus } from 'lucide-react';
+import { Search, Bell, User, Menu, Plus, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -8,14 +8,36 @@ interface HeaderProps {
   onCreateThread: () => void;
 }
 
+const defaultAvatar = "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&crop=face";
+
 export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const avatar = user?.avatar || defaultAvatar;
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+    setUserMenuOpen(false);
+  };
+
+  const handleProfile = () => {
+    navigate('/profile');
+    setUserMenuOpen(false);
+  };
+
+  const handleDashboard = () => {
+    navigate('/dashboard');
+    setUserMenuOpen(false);
+  };
+
+  // Optional: handle search (redirect or filter)
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement search logic (e.g., redirect or filter)
   };
 
   return (
@@ -27,29 +49,34 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
             <button 
               onClick={onMenuToggle}
               className="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              aria-label="Toggle Sidebar"
             >
               <Menu size={24} />
             </button>
-            <div className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2 group">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-700 to-purple-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">EW</span>
+                <span className="text-white font-bold text-sm">RM</span>
               </div>
-              <h1 className="text-xl font-bold text-gray-900 hidden sm:block">Ethereum Work</h1>
-            </div>
+              <h1 className="text-xl font-bold text-gray-900 hidden sm:block group-hover:text-blue-700 transition-colors">
+                Romusha
+              </h1>
+            </Link>
           </div>
 
           {/* Center - Search */}
           <div className="flex-1 max-w-2xl mx-8 hidden md:block">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Search threads, users, or topics..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-              />
-            </div>
+            <form onSubmit={handleSearchSubmit}>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search threads, users, or topics..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                />
+              </div>
+            </form>
           </div>
 
           {/* Right section */}
@@ -71,42 +98,68 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
               </>
             ) : (
               <>
+                {/* New Thread */}
                 <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 rounded-lg text-white bg-red-600 font-semibold hover:bg-red-700 transition"
+                  onClick={onCreateThread}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
                 >
-                  Logout
+                  <Plus size={16} />
+                  <span className="hidden sm:inline">New Thread</span>
                 </button>
-                <span className="font-medium text-gray-900">{user.name}</span>
+
+                {/* Notifikasi */}
+                <Link
+                  to="/notifications"
+                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors relative"
+                  aria-label="Notifications"
+                >
+                  <Bell size={20} />
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    3
+                  </span>
+                </Link>
+                
+                {/* Avatar User + Dropdown */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    className="flex items-center space-x-2 focus:outline-none"
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    aria-label="User menu"
+                  >
+                    <img
+                      src={avatar}
+                      alt="User avatar"
+                      className="w-8 h-8 rounded-full border border-gray-300 object-cover"
+                    />
+                    <span className="hidden sm:inline font-medium text-gray-900">{user.name}</span>
+                    <ChevronDown size={16} className="text-gray-500" />
+                  </button>
+                  {userMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-2">
+                      <button
+                        className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
+                        onClick={handleProfile}
+                      >
+                        Profile
+                      </button>
+                      <button
+                        className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
+                        onClick={handleDashboard}
+                      >
+                        Dashboard
+                      </button>
+                      <button
+                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition"
+                        onClick={handleLogout}
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
               </>
             )}
-
-            {/* New Thread */}
-            <button
-              onClick={onCreateThread}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-            >
-              <Plus size={16} />
-              <span className="hidden sm:inline">New Thread</span>
-            </button>
-
-            {/* Notifikasi */}
-            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors relative">
-              <Bell size={20} />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                3
-              </span>
-            </button>
-            
-            {/* Avatar User */}
-            <div className="flex items-center space-x-2">
-              <img
-                src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&crop=face"
-                alt="User avatar"
-                className="w-8 h-8 rounded-full"
-              />
-              {user && <span className="hidden sm:inline font-medium text-gray-900">{user.name}</span>}
-            </div>
           </div>
         </div>
       </div>

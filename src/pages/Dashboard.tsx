@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -46,7 +46,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full">
-        <h2 className="text-2xl font-bold mb-4 text-blue-700 text-center">Dashboard Ethereum Work</h2>
+        <h2 className="text-2xl font-bold mb-4 text-blue-700 text-center">Dashboard Romusha</h2>
         <div className="mb-6 text-center">
           <div className="text-gray-700 font-medium mb-2">Selamat datang, <span className="font-bold">{user.name}</span></div>
           <div className="text-4xl font-bold text-green-600 mb-1">Rp{balance.toLocaleString()}</div>
@@ -55,7 +55,7 @@ export default function Dashboard() {
         {message && (
           <div className="text-center text-sm mb-4 text-blue-700">{message}</div>
         )}
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 mb-4">
           <button
             onClick={() => { setShowTopUp(true); setShowWithdraw(false); setMessage(''); }}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
@@ -68,6 +68,14 @@ export default function Dashboard() {
           >
             Withdraw
           </button>
+        </div>
+        <div className="flex justify-center mb-4">
+          <Link
+            to="/profile"
+            className="text-blue-700 font-semibold hover:underline transition-colors"
+          >
+            Lihat & Edit Profil
+          </Link>
         </div>
         {showTopUp && (
           <form onSubmit={handleTopUp} className="mt-6">
