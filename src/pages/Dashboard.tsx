@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useAuth } from '../context/AuthContext';
+import { Navigate } from 'react-router-dom';
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" />;
+
   // Data dummy
-  const [balance, setBalance] = useState(1500000); // dalam Rupiah
-  const [name] = useState('TechGuru');
-  const [showTopUp, setShowTopUp] = useState(false);
-  const [showWithdraw, setShowWithdraw] = useState(false);
-  const [amount, setAmount] = useState('');
-  const [message, setMessage] = useState('');
+  const [balance, setBalance] = React.useState(1500000);
+  const [showTopUp, setShowTopUp] = React.useState(false);
+  const [showWithdraw, setShowWithdraw] = React.useState(false);
+  const [amount, setAmount] = React.useState('');
+  const [message, setMessage] = React.useState('');
 
   const handleTopUp = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +48,7 @@ export default function Dashboard() {
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full">
         <h2 className="text-2xl font-bold mb-4 text-blue-700 text-center">Dashboard Ethereum Work</h2>
         <div className="mb-6 text-center">
-          <div className="text-gray-700 font-medium mb-2">Selamat datang, <span className="font-bold">{name}</span></div>
+          <div className="text-gray-700 font-medium mb-2">Selamat datang, <span className="font-bold">{user.name}</span></div>
           <div className="text-4xl font-bold text-green-600 mb-1">Rp{balance.toLocaleString()}</div>
           <div className="text-gray-500 text-sm">Saldo kamu</div>
         </div>
@@ -65,8 +69,6 @@ export default function Dashboard() {
             Withdraw
           </button>
         </div>
-
-        {/* Form Top Up */}
         {showTopUp && (
           <form onSubmit={handleTopUp} className="mt-6">
             <label className="block mb-2 font-medium">Nominal Top Up (Rp)</label>
@@ -93,8 +95,6 @@ export default function Dashboard() {
             </button>
           </form>
         )}
-
-        {/* Form Withdraw */}
         {showWithdraw && (
           <form onSubmit={handleWithdraw} className="mt-6">
             <label className="block mb-2 font-medium">Nominal Withdraw (Rp)</label>
