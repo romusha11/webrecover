@@ -27,7 +27,6 @@ export default function Sidebar({ categories, selectedCategory, onCategorySelect
       <div className="h-full overflow-y-auto p-4">
         {/* Navigation */}
         <nav className="space-y-2 mb-8">
-          {/* Dashboard button (only if user login) */}
           {user && (
             <Link
               to="/dashboard"
@@ -120,4 +119,4 @@ export default function Sidebar({ categories, selectedCategory, onCategorySelect
       </div>
     </aside>
   );
-                      }
+}

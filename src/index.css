@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Tambahan best practice: */
+body {
+  font-family: 'Inter', 'Roboto', 'Arial', sans-serif;
+  background-color: #f9fafb;
+}
+
+/* Responsive scrollbar for modern browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  background: #e5e7eb;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}

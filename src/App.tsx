@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import ThreadCard from './components/ThreadCard';
@@ -12,7 +12,12 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import { useAuth } from './context/AuthContext';
 
-// ForumHome berisi logic App forum lama
+// Proteksi route dashboard
+function ProtectedRoute({ redirect = "/login" }) {
+  const { user } = useAuth();
+  return user ? <Outlet /> : <Navigate to={redirect} />;
+}
+
 function ForumHome() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
@@ -43,7 +48,7 @@ function ForumHome() {
   if (selectedThread) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header 
+        <Header
           onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
           onCreateThread={() => setIsCreateModalOpen(true)}
         />
@@ -55,8 +60,8 @@ function ForumHome() {
             isOpen={isSidebarOpen}
           />
           <main className="flex-1 p-6">
-            <ThreadView 
-              thread={selectedThread} 
+            <ThreadView
+              thread={selectedThread}
               onBack={handleBackToThreads}
             />
           </main>
@@ -72,7 +77,7 @@ function ForumHome() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
+      <Header
         onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         onCreateThread={() => setIsCreateModalOpen(true)}
       />
@@ -87,8 +92,8 @@ function ForumHome() {
           <div className="max-w-4xl mx-auto">
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {selectedCategory 
-                  ? mockCategories.find(c => c.id === selectedCategory)?.name 
+                {selectedCategory
+                  ? mockCategories.find(c => c.id === selectedCategory)?.name
                   : 'All Threads'
                 }
               </h2>
@@ -130,16 +135,24 @@ function ForumHome() {
               ) : (
                 <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
                   <div className="text-gray-500 mb-4">
-                    <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.[...]
+                    {/* SVG valid untuk React */}
+                    <svg
+                      className="w-16 h-16 mx-auto mb-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={2} />
+                      <line x1="8" y1="12" x2="8.01" y2="12" stroke="currentColor" strokeWidth={2} />
+                      <line x1="12" y1="12" x2="12.01" y2="12" stroke="currentColor" strokeWidth={2} />
+                      <line x1="16" y1="12" x2="16.01" y2="12" stroke="currentColor" strokeWidth={2} />
                     </svg>
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No threads found</h3>
                   <p className="text-gray-600 mb-4">
-                    {selectedCategory 
+                    {selectedCategory
                       ? 'There are no threads in this category yet. Be the first to start a discussion!'
-                      : 'No threads match your current filters.'
-                    }
+                      : 'No threads match your current filters.'}
                   </p>
                   <button
                     onClick={() => setIsCreateModalOpen(true)}
@@ -154,7 +167,7 @@ function ForumHome() {
         </main>
       </div>
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -168,23 +181,16 @@ function ForumHome() {
   );
 }
 
-// Proteksi halaman dashboard (hanya bisa diakses jika sudah login)
-function ProtectedDashboard() {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" />;
-  return <Dashboard />;
-}
-
-// App utama: routing multi-halaman
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<ProtectedDashboard />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
         <Route path="/" element={<ForumHome />} />
-        {/* Redirect unknown routes to home */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
