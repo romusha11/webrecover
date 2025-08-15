@@ -22,9 +22,11 @@ interface AuthContextType {
   removeBookmark: (threadId: string) => void;
 }
 
+// Default values
 const ADMIN_EMAIL = "admin@romusha.com";
 const ADMIN_NAME = "BlackQuill";
 const ADMIN_AVATAR = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+const DEFAULT_AVATAR = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=identicon";
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
@@ -47,15 +49,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     else localStorage.removeItem("user");
   }, [user]);
 
-  // Login logic: if email is admin, role is admin & name is BlackQuill
+  // Utility: get joinDate from previous user if available
+  const getJoinDate = (email: string) => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      const prev = JSON.parse(savedUser);
+      if (prev.email === email && prev.joinDate) return prev.joinDate;
+    }
+    return new Date().toISOString();
+  };
+
+  // Login logic
   const login = ({ name, email, avatar }: { name: string; email: string; avatar?: string }) => {
+    const joinDate = getJoinDate(email);
     if (email === ADMIN_EMAIL) {
       setUser({
         name: ADMIN_NAME,
         email,
         avatar: ADMIN_AVATAR,
         role: 'admin',
-        joinDate: new Date().toISOString(),
+        joinDate,
         isOnline: true,
         balance: 10000000,
         bookmarks: [],
@@ -65,9 +78,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser({
         name,
         email,
-        avatar,
+        avatar: avatar || DEFAULT_AVATAR,
         role: 'user',
-        joinDate: new Date().toISOString(),
+        joinDate,
         isOnline: true,
         balance: 0,
         bookmarks: [],
@@ -76,11 +89,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Logout logic
   const logout = () => setUser(null);
-  const updateProfile = (newData: Partial<User>) => setUser(prev => prev ? { ...prev, ...newData } : prev);
-  const updateBalance = (amount: number) => setUser(prev => prev ? { ...prev, balance: (prev.balance || 0) + amount } : prev);
-  const addBookmark = (threadId: string) => setUser(prev => prev ? { ...prev, bookmarks: prev.bookmarks?.includes(threadId) ? prev.bookmarks : [...(prev.bookmarks || []), threadId] } : prev);
-  const removeBookmark = (threadId: string) => setUser(prev => prev ? { ...prev, bookmarks: (prev.bookmarks || []).filter(id => id !== threadId) } : prev);
+
+  // Update profile fields (ex: name, avatar)
+  const updateProfile = (newData: Partial<User>) =>
+    setUser(prev => prev ? { ...prev, ...newData } : prev);
+
+  // Update balance
+  const updateBalance = (amount: number) =>
+    setUser(prev => prev ? { ...prev, balance: (prev.balance || 0) + amount } : prev);
+
+  // Add bookmark, prevent duplicates
+  const addBookmark = (threadId: string) =>
+    setUser(prev =>
+      prev
+        ? {
+            ...prev,
+            bookmarks: prev.bookmarks && prev.bookmarks.includes(threadId)
+              ? prev.bookmarks
+              : [...(prev.bookmarks || []), threadId],
+          }
+        : prev
+    );
+
+  // Remove bookmark
+  const removeBookmark = (threadId: string) =>
+    setUser(prev =>
+      prev
+        ? {
+            ...prev,
+            bookmarks: (prev.bookmarks || []).filter(id => id !== threadId),
+          }
+        : prev
+    );
 
   return (
     <AuthContext.Provider value={{ user, login, logout, updateProfile, updateBalance, addBookmark, removeBookmark }}>
