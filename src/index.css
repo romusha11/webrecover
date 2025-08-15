@@ -2,18 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tambahan best practice: */
+/* Dark mode black operation */
 body {
   font-family: 'Inter', 'Roboto', 'Arial', sans-serif;
-  background-color: #f9fafb;
+  background-color: #0a0a0a;
+  color: #8a6cff;
 }
 
-/* Responsive scrollbar for modern browsers */
+/* All backgrounds to full black */
+.bg-gray-50, .bg-white, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+  background-color: #0a0a0a !important;
+}
+
+/* All borders to dark */
+.border, .border-gray-200, .border-gray-300, .border-gray-400, .border-gray-500 {
+  border-color: #191919 !important;
+}
+
+/* All text to blue-purple */
+.text-gray-900, .text-gray-700, .text-gray-600, .text-gray-500, .text-black, .text-white {
+  color: #8a6cff !important;
+}
+
+/* Headings & strong to slightly brighter blue-purple */
+h1, h2, h3, h4, h5, h6, strong, .font-bold, .font-semibold {
+  color: #7b90ff !important;
+}
+
+/* Input fields */
+input, textarea, select {
+  background-color: #181818 !important;
+  color: #8a6cff !important;
+  border-color: #282828 !important;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: #7b90ff !important;
+  box-shadow: 0 0 0 2px #7b90ff33 !important;
+}
+
+/* Button backgrounds */
+button, .bg-blue-600, .bg-blue-700, .bg-blue-800, .bg-purple-600, .bg-purple-700, .bg-purple-800 {
+  background-color: #181818 !important;
+  color: #8a6cff !important;
+  border: 1px solid #282828 !important;
+}
+button:hover, .bg-blue-700:hover, .bg-purple-700:hover {
+  background-color: #222 !important;
+  color: #7b90ff !important;
+}
+
+/* Sidebar, header, modals */
+header, aside, .modal, .rounded-lg, .shadow-lg, .shadow, .border {
+  background-color: #111 !important;
+  border-color: #191919 !important;
+}
+
+/* Custom scrollbar for dark mode */
 ::-webkit-scrollbar {
   width: 8px;
-  background: #e5e7eb;
+  background: #191919;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #222;
   border-radius: 4px;
+}
+
+/* Links */
+a, .hover\:underline:hover {
+  color: #7b90ff !important;
+}
+
+/* Overlay */
+.bg-black, .bg-opacity-40, .bg-opacity-50 {
+  background-color: #000 !important;
+  opacity: 0.8 !important;
 }
