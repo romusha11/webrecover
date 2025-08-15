@@ -1,102 +1,38 @@
-import React from 'react';
-import { LayoutDashboard, Home, TrendingUp, Users } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { mockCategories } from '../data/mockData';
+import React, { useState } from 'react';
+import Login from '../pages/Login';
+import Register from '../pages/Register';
 
-interface SidebarProps {
-  isOpen: boolean;
-  onCloseSidebar: () => void;
-}
-
-export default function Sidebar({ isOpen, onCloseSidebar }: SidebarProps) {
-  const { user } = useAuth();
-  const location = useLocation();
-
+export default function LoginRegisterModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [tab, setTab] = useState<'login' | 'register'>('login');
+  if (!isOpen) return null;
   return (
-    <aside
-      className={`fixed md:static inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:flex`}
-      style={{ height: '100vh', background: '#111', borderRight: '1px solid #191919' }}
-      aria-label="Sidebar navigasi"
-    >
-      <div className="h-full overflow-y-auto p-4">
-        <nav className="space-y-2 mb-8">
-          {user && (
-            <Link
-              to="/dashboard"
-              className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium ${
-                location.pathname === "/dashboard" ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
-              }`}
-              style={{ color: '#8a6cff' }}
-              onClick={onCloseSidebar}
-            >
-              <LayoutDashboard size={20} />
-              <span>Dashboard</span>
-            </Link>
-          )}
-          <Link
-            to="/"
-            className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium ${
-              location.pathname === "/" ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
-            }`}
-            style={{ color: '#8a6cff' }}
-            onClick={onCloseSidebar}
+    <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+      <div className="rounded-lg shadow-lg w-full max-w-md p-6" style={{ background: '#111', color: '#8a6cff' }}>
+        <div className="flex justify-between mb-4">
+          <button
+            className={`flex-1 py-2 ${tab === 'login' ? 'font-bold border-b-2' : ''}`}
+            style={{ borderColor: tab === 'login' ? '#7b90ff' : 'transparent', color: '#7b90ff', background: '#181818' }}
+            onClick={() => setTab('login')}
           >
-            <Home size={20} />
-            <span>Forum</span>
-          </Link>
-          <Link
-            to="/my-activity"
-            className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium ${
-              location.pathname === "/my-activity" ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
-            }`}
-            style={{ color: '#8a6cff' }}
-            onClick={onCloseSidebar}
+            Login
+          </button>
+          <button
+            className={`flex-1 py-2 ${tab === 'register' ? 'font-bold border-b-2' : ''}`}
+            style={{ borderColor: tab === 'register' ? '#7b90ff' : 'transparent', color: '#7b90ff', background: '#181818' }}
+            onClick={() => setTab('register')}
           >
-            <TrendingUp size={20} />
-            <span>Activity</span>
-          </Link>
-          <Link
-            to="/profile"
-            className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium ${
-              location.pathname === "/profile" ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
-            }`}
-            style={{ color: '#8a6cff' }}
-            onClick={onCloseSidebar}
-          >
-            <Users size={20} />
-            <span>Profile</span>
-          </Link>
-          {user?.role === "admin" && (
-            <Link
-              to="/admin"
-              className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium ${
-                location.pathname === "/admin" ? 'bg-red-100 text-red-700' : 'hover:bg-gray-100'
-              }`}
-              style={{ color: '#7b90ff' }}
-              onClick={onCloseSidebar}
-            >
-              <LayoutDashboard size={20} />
-              <span>Admin Panel</span>
-            </Link>
-          )}
-        </nav>
-        <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#7b90ff' }}>Categories</h3>
-          <div className="space-y-1">
-            {mockCategories.map(c => (
-              <div key={c.id} className="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100" style={{ color: '#8a6cff' }}>
-                <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#181818' }}>
-                  {/* icon */}
-                </span>
-                <span className="ml-2 font-medium">{c.name}</span>
-                <span className="ml-auto text-xs" style={{ color: '#7b90ff' }}>{c.threadCount} threads</span>
-              </div>
-            ))}
-          </div>
+            Register
+          </button>
         </div>
+        {tab === 'login' ? <Login onSuccess={onClose} /> : <Register onSuccess={onClose} />}
+        <button
+          onClick={onClose}
+          className="mt-4 text-sm underline block mx-auto"
+          style={{ color: '#7b90ff', background: '#181818' }}
+        >
+          Tutup
+        </button>
       </div>
-    </aside>
+    </div>
   );
 }
