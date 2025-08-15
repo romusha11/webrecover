@@ -24,6 +24,11 @@ export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  React.useEffect(() => {
+    document.body.style.overflow = (isSidebarOpen || authModalOpen) ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isSidebarOpen, authModalOpen]);
+
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-gray-50">
@@ -31,12 +36,18 @@ export default function App() {
           onAuthClick={() => setAuthModalOpen(true)}
           onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         />
-        <div className="flex flex-1">
+        <div className="flex flex-1 relative">
           <Sidebar
             isOpen={isSidebarOpen}
             onCloseSidebar={() => setIsSidebarOpen(false)}
           />
-          <main className="flex-1 min-h-screen bg-gray-50 p-4 md:p-6">
+          {isSidebarOpen && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+          )}
+          <main className="flex-1 min-h-screen p-4 md:p-6">
             <Routes>
               <Route path="/" element={<ForumHome />} />
               <Route
@@ -79,13 +90,6 @@ export default function App() {
           isOpen={authModalOpen}
           onClose={() => setAuthModalOpen(false)}
         />
-        {/* Overlay for mobile sidebar */}
-        {isSidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
       </div>
     </Router>
   );
