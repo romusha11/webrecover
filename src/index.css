@@ -6,11 +6,11 @@
 body {
   font-family: 'Inter', 'Roboto', 'Arial', sans-serif;
   background-color: #0a0a0a;
-  color: #8a6cff;
+  color: #4a74ff;
 }
 
 /* All backgrounds to full black */
-.bg-gray-50, .bg-white, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-blue-100, .bg-blue-600, .bg-blue-700, .bg-blue-800, .bg-purple-600, .bg-purple-700, .bg-purple-800, .bg-red-100 {
+.bg-gray-50, .bg-white, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-blue-100, .bg-blue-600, .bg-blue-700, .bg-blue-800, .bg-purple-600, .bg-purple-700, .bg-purple-800, .bg-red-100 {
   background-color: #0a0a0a !important;
 }
 
@@ -19,39 +19,36 @@ body {
   border-color: #191919 !important;
 }
 
-/* All text to blue-purple */
-.text-gray-900, .text-gray-700, .text-gray-600, .text-gray-500, .text-black, .text-white, .text-red-700 {
-  color: #8a6cff !important;
+/* All text to blue (default) */
+.text-gray-900, .text-gray-700, .text-gray-600, .text-gray-500, .text-black, .text-white {
+  color: #4a74ff !important;
 }
 
-.text-blue-700, .text-blue-600, .text-blue-800, .text-purple-700, .text-purple-600, .text-purple-800, .text-red-600 {
-  color: #7b90ff !important;
-}
-
+/* Headings & strong to white */
 h1, h2, h3, h4, h5, h6, strong, .font-bold, .font-semibold {
-  color: #7b90ff !important;
+  color: #fff !important;
 }
 
 /* Input fields */
 input, textarea, select {
   background-color: #181818 !important;
-  color: #8a6cff !important;
+  color: #4a74ff !important;
   border-color: #282828 !important;
 }
 input:focus, textarea:focus, select:focus {
-  border-color: #7b90ff !important;
-  box-shadow: 0 0 0 2px #7b90ff33 !important;
+  border-color: #4a74ff !important;
+  box-shadow: 0 0 0 2px #4a74ff33 !important;
 }
 
 /* Button backgrounds */
 button, .bg-blue-600, .bg-blue-700, .bg-blue-800, .bg-purple-600, .bg-purple-700, .bg-purple-800 {
   background-color: #181818 !important;
-  color: #8a6cff !important;
+  color: #fff !important;
   border: 1px solid #282828 !important;
 }
 button:hover, .bg-blue-700:hover, .bg-purple-700:hover {
   background-color: #222 !important;
-  color: #7b90ff !important;
+  color: #4a74ff !important;
 }
 
 /* Sidebar, header, modals */
@@ -72,7 +69,7 @@ header, aside, .modal, .rounded-lg, .shadow-lg, .shadow, .border {
 
 /* Links */
 a, .hover\:underline:hover {
-  color: #7b90ff !important;
+  color: #4a74ff !important;
 }
 
 /* Overlay */
