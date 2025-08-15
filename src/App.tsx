@@ -22,13 +22,20 @@ function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-gray-50">
-        <Header onAuthClick={() => setAuthModalOpen(true)} />
+        <Header
+          onAuthClick={() => setAuthModalOpen(true)}
+          onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
         <div className="flex flex-1">
-          <Sidebar />
+          <Sidebar
+            isOpen={isSidebarOpen}
+            onCloseSidebar={() => setIsSidebarOpen(false)}
+          />
           <main className="flex-1 min-h-screen bg-gray-50 p-4 md:p-6">
             <Routes>
               <Route path="/" element={<ForumHome />} />
@@ -64,7 +71,6 @@ export default function App() {
                   </AdminProtectedRoute>
                 }
               />
-              {/* Fallback */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </main>
@@ -73,6 +79,13 @@ export default function App() {
           isOpen={authModalOpen}
           onClose={() => setAuthModalOpen(false)}
         />
+        {/* Overlay for mobile sidebar */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
       </div>
     </Router>
   );
