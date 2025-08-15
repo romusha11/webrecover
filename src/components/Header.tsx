@@ -2,13 +2,21 @@ import React from 'react';
 import { Bell, Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export default function Header({ onAuthClick }: { onAuthClick: () => void }) {
+interface HeaderProps {
+  onAuthClick: () => void;
+  onMenuToggle: () => void;
+}
+
+export default function Header({ onAuthClick, onMenuToggle }: HeaderProps) {
   const { user, logout } = useAuth();
 
   return (
     <header className="bg-white border-b shadow-sm flex items-center justify-between px-6 py-3 sticky top-0 z-50">
       <div className="flex items-center space-x-4">
-        <button className="md:hidden p-2 rounded text-gray-600 hover:bg-gray-100">
+        <button
+          className="md:hidden p-2 rounded text-gray-600 hover:bg-gray-100"
+          onClick={onMenuToggle}
+        >
           <Menu size={24} />
         </button>
         <span className="text-2xl font-extrabold text-blue-700 tracking-wide">Romusha</span>
