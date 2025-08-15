@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark mode black operation */
+/* Black operation dark mode */
 body {
   font-family: 'Inter', 'Roboto', 'Arial', sans-serif;
   background-color: #0a0a0a;
@@ -10,7 +10,7 @@ body {
 }
 
 /* All backgrounds to full black */
-.bg-gray-50, .bg-white, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500 {
+.bg-gray-50, .bg-white, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-blue-100, .bg-blue-600, .bg-blue-700, .bg-blue-800, .bg-purple-600, .bg-purple-700, .bg-purple-800, .bg-red-100 {
   background-color: #0a0a0a !important;
 }
 
@@ -20,11 +20,14 @@ body {
 }
 
 /* All text to blue-purple */
-.text-gray-900, .text-gray-700, .text-gray-600, .text-gray-500, .text-black, .text-white {
+.text-gray-900, .text-gray-700, .text-gray-600, .text-gray-500, .text-black, .text-white, .text-red-700 {
   color: #8a6cff !important;
 }
 
-/* Headings & strong to slightly brighter blue-purple */
+.text-blue-700, .text-blue-600, .text-blue-800, .text-purple-700, .text-purple-600, .text-purple-800, .text-red-600 {
+  color: #7b90ff !important;
+}
+
 h1, h2, h3, h4, h5, h6, strong, .font-bold, .font-semibold {
   color: #7b90ff !important;
 }
