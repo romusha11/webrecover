@@ -14,7 +14,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   return user ? <>{children}</> : <Navigate to="/" />;
 }
-
 function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   return user && user.role === "admin" ? <>{children}</> : <Navigate to="/" />;
@@ -23,6 +22,7 @@ function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   React.useEffect(() => {
     document.body.style.overflow = (isSidebarOpen || authModalOpen) ? "hidden" : "";
@@ -40,6 +40,8 @@ export default function App() {
           <Sidebar
             isOpen={isSidebarOpen}
             onCloseSidebar={() => setIsSidebarOpen(false)}
+            selectedCategory={selectedCategory}
+            onCategorySelect={setSelectedCategory}
           />
           {isSidebarOpen && (
             <div
@@ -49,7 +51,12 @@ export default function App() {
           )}
           <main className="flex-1 min-h-screen p-4 md:p-6">
             <Routes>
-              <Route path="/" element={<ForumHome />} />
+              <Route path="/" element={
+                <ForumHome
+                  selectedCategory={selectedCategory}
+                  onCategorySelect={setSelectedCategory}
+                />
+              } />
               <Route
                 path="/dashboard"
                 element={
