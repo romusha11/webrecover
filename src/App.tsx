@@ -1,199 +1,79 @@
-import React, { useState, useMemo } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
-import ThreadCard from './components/ThreadCard';
-import ThreadView from './components/ThreadView';
-import CreateThreadModal from './components/CreateThreadModal';
-import { mockCategories, mockThreads } from './data/mockData';
-import { Thread } from './types/forum';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import ForumHome from './pages/ForumHome';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import AdminPanel from './pages/AdminPanel';
 import MyActivity from './pages/MyActivity';
 import { useAuth } from './context/AuthContext';
+import LoginRegisterModal from './components/LoginRegisterModal';
 
-// User-only route
-function ProtectedRoute({ redirect = "/login" }) {
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  return user ? <Outlet /> : <Navigate to={redirect} />;
+  return user ? <>{children}</> : <Navigate to="/" />;
 }
 
-// Admin-only route
-function AdminProtectedRoute({ redirect = "/" }) {
+function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  return user && user.role === "admin" ? <Outlet /> : <Navigate to={redirect} />;
+  return user && user.role === "admin" ? <>{children}</> : <Navigate to="/" />;
 }
 
-function ForumHome() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+export default function App() {
+  const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  const filteredThreads = useMemo(() => {
-    if (!selectedCategory) return mockThreads;
-    return mockThreads.filter(thread => thread.category.id === selectedCategory);
-  }, [selectedCategory]);
-
-  const sortedThreads = useMemo(() => {
-    return [...filteredThreads].sort((a, b) => {
-      if (a.isPinned && !b.isPinned) return -1;
-      if (!a.isPinned && b.isPinned) return 1;
-      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-    });
-  }, [filteredThreads]);
-
-  const handleThreadClick = (thread: Thread) => {
-    setSelectedThread(thread);
-  };
-
-  const handleBackToThreads = () => {
-    setSelectedThread(null);
-  };
-
-  // Responsive overlay for mobile sidebar menu
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header
-        onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        onCreateThread={() => setIsCreateModalOpen(true)}
-      />
-      <div className="flex flex-1">
-        <Sidebar
-          categories={mockCategories}
-          selectedCategory={selectedCategory}
-          onCategorySelect={setSelectedCategory}
-          isOpen={isSidebarOpen}
-        />
-        <main className="flex-1 p-4 md:p-6">
-          {selectedThread ? (
-            <ThreadView
-              thread={selectedThread}
-              onBack={handleBackToThreads}
-            />
-          ) : (
-            <div className="max-w-4xl mx-auto">
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  {selectedCategory
-                    ? mockCategories.find(c => c.id === selectedCategory)?.name
-                    : 'All Threads'
-                  }
-                </h2>
-                <p className="text-gray-600">
-                  {selectedCategory
-                    ? mockCategories.find(c => c.id === selectedCategory)?.description
-                    : 'Discover and participate in discussions across all topics'
-                  }
-                </p>
-              </div>
-              <div className="flex items-center justify-between mb-6 p-4 bg-white rounded-lg border border-gray-200">
-                <div className="flex items-center space-x-4">
-                  <select className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
-                    <option>Latest Activity</option>
-                    <option>Most Votes</option>
-                    <option>Most Replies</option>
-                    <option>Newest</option>
-                  </select>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <span>Showing {sortedThreads.length} threads</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
-                >
-                  New Thread
-                </button>
-              </div>
-              <div className="space-y-4">
-                {sortedThreads.length > 0 ? (
-                  sortedThreads.map((thread) => (
-                    <ThreadCard
-                      key={thread.id}
-                      thread={thread}
-                      onThreadClick={handleThreadClick}
-                    />
-                  ))
-                ) : (
-                  <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                    <div className="text-gray-500 mb-4">
-                      <svg
-                        className="w-16 h-16 mx-auto mb-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={2} />
-                        <line x1="8" y1="12" x2="8.01" y2="12" stroke="currentColor" strokeWidth={2} />
-                        <line x1="12" y1="12" x2="12.01" y2="12" stroke="currentColor" strokeWidth={2} />
-                        <line x1="16" y1="12" x2="16.01" y2="12" stroke="currentColor" strokeWidth={2} />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No threads found</h3>
-                    <p className="text-gray-600 mb-4">
-                      {selectedCategory
-                        ? 'There are no threads in this category yet. Be the first to start a discussion!'
-                        : 'No threads match your current filters.'}
-                    </p>
-                    <button
-                      onClick={() => setIsCreateModalOpen(true)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-                    >
-                      Create First Thread
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </main>
-      </div>
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-      <CreateThreadModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        categories={mockCategories}
-      />
-    </div>
-  );
-}
-
-function App() {
   return (
     <Router>
-      <Routes>
-        {/* Login & Register routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* User routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/my-activity" element={<MyActivity />} />
-        </Route>
-
-        {/* Admin-only route */}
-        <Route element={<AdminProtectedRoute />}>
-          <Route path="/admin" element={<AdminPanel />} />
-        </Route>
-
-        {/* Forum Home */}
-        <Route path="/" element={<ForumHome />} />
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header onAuthClick={() => setAuthModalOpen(true)} />
+        <div className="flex flex-1">
+          <Sidebar />
+          <main className="flex-1 min-h-screen bg-gray-50 p-4 md:p-6">
+            <Routes>
+              <Route path="/" element={<ForumHome />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-activity"
+                element={
+                  <ProtectedRoute>
+                    <MyActivity />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminPanel />
+                  </AdminProtectedRoute>
+                }
+              />
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </main>
+        </div>
+        <LoginRegisterModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+        />
+      </div>
     </Router>
   );
 }
-
-export default App;
