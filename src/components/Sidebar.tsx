@@ -22,25 +22,23 @@ export default function Sidebar({ isOpen, onCloseSidebar }: SidebarProps) {
     >
       <div className="h-full overflow-y-auto p-4">
         <nav className="space-y-2 mb-8">
-          {user && (
-            <Link
-              to="/dashboard"
-              className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium ${
-                location.pathname === "/dashboard" ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
-              }`}
-              style={{ color: '#8a6cff' }}
-              onClick={onCloseSidebar}
-            >
-              <LayoutDashboard size={20} />
-              <span>Dashboard</span>
-            </Link>
-          )}
+          <Link
+            to="/dashboard"
+            className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium ${
+              location.pathname === "/dashboard" ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
+            }`}
+            style={{ color: '#4a74ff' }}
+            onClick={onCloseSidebar}
+          >
+            <LayoutDashboard size={20} />
+            <span>Dashboard</span>
+          </Link>
           <Link
             to="/"
             className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium ${
               location.pathname === "/" ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
             }`}
-            style={{ color: '#8a6cff' }}
+            style={{ color: '#4a74ff' }}
             onClick={onCloseSidebar}
           >
             <Home size={20} />
@@ -51,7 +49,7 @@ export default function Sidebar({ isOpen, onCloseSidebar }: SidebarProps) {
             className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium ${
               location.pathname === "/my-activity" ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
             }`}
-            style={{ color: '#8a6cff' }}
+            style={{ color: '#4a74ff' }}
             onClick={onCloseSidebar}
           >
             <TrendingUp size={20} />
@@ -62,7 +60,7 @@ export default function Sidebar({ isOpen, onCloseSidebar }: SidebarProps) {
             className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium ${
               location.pathname === "/profile" ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'
             }`}
-            style={{ color: '#8a6cff' }}
+            style={{ color: '#4a74ff' }}
             onClick={onCloseSidebar}
           >
             <Users size={20} />
@@ -74,7 +72,7 @@ export default function Sidebar({ isOpen, onCloseSidebar }: SidebarProps) {
               className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium ${
                 location.pathname === "/admin" ? 'bg-red-100 text-red-700' : 'hover:bg-gray-100'
               }`}
-              style={{ color: '#7b90ff' }}
+              style={{ color: '#fff' }}
               onClick={onCloseSidebar}
             >
               <LayoutDashboard size={20} />
@@ -83,15 +81,15 @@ export default function Sidebar({ isOpen, onCloseSidebar }: SidebarProps) {
           )}
         </nav>
         <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#7b90ff' }}>Categories</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: '#fff' }}>Categories</h3>
           <div className="space-y-1">
             {mockCategories.map(c => (
-              <div key={c.id} className="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100" style={{ color: '#8a6cff' }}>
+              <div key={c.id} className="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100" style={{ color: '#4a74ff' }}>
                 <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#181818' }}>
                   {/* icon */}
                 </span>
                 <span className="ml-2 font-medium">{c.name}</span>
-                <span className="ml-auto text-xs" style={{ color: '#7b90ff' }}>{c.threadCount} threads</span>
+                <span className="ml-auto text-xs" style={{ color: '#fff' }}>{c.threadCount} threads</span>
               </div>
             ))}
           </div>
