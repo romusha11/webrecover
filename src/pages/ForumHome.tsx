@@ -10,7 +10,6 @@ export default function ForumHome() {
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // Filter & Sort logic (efisien)
   const filteredThreads = useMemo(() => {
     if (!selectedCategory) return mockThreads;
     return mockThreads.filter(thread => thread.category.id === selectedCategory);
@@ -24,7 +23,6 @@ export default function ForumHome() {
     });
   }, [filteredThreads]);
 
-  // Navigasi balik
   const handleThreadClick = (thread: Thread) => {
     setSelectedThread(thread);
   };
