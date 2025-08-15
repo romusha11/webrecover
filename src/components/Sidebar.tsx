@@ -29,7 +29,6 @@ export default function Sidebar({
     >
       <div className="h-full overflow-y-auto p-4">
         <nav className="space-y-2 mb-8">
-          {/* Dashboard SELALU tampil untuk user yang login */}
           <Link
             to="/dashboard"
             className={`flex items-center space-x-3 px-3 py-2 rounded-lg font-medium ${
