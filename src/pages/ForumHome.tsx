@@ -10,6 +10,7 @@ export default function ForumHome() {
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  // Filter & Sort logic (efisien)
   const filteredThreads = useMemo(() => {
     if (!selectedCategory) return mockThreads;
     return mockThreads.filter(thread => thread.category.id === selectedCategory);
@@ -23,6 +24,7 @@ export default function ForumHome() {
     });
   }, [filteredThreads]);
 
+  // Navigasi balik
   const handleThreadClick = (thread: Thread) => {
     setSelectedThread(thread);
   };
@@ -48,11 +50,15 @@ export default function ForumHome() {
       </div>
       <div className="flex items-center justify-between mb-6 p-4 bg-white rounded-lg border border-gray-200">
         <div className="flex items-center space-x-4">
-          <select className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
-            <option>Latest Activity</option>
-            <option>Most Votes</option>
-            <option>Most Replies</option>
-            <option>Newest</option>
+          <select
+            className="border border-gray-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            onChange={e => setSelectedCategory(e.target.value || null)}
+            value={selectedCategory || ""}
+          >
+            <option value="">All Categories</option>
+            {mockCategories.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
           </select>
           <div className="flex items-center space-x-2 text-sm text-gray-600">
             <span>Showing {sortedThreads.length} threads</span>
