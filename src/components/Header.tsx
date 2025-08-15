@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Bell, User, Menu, Plus, ChevronDown } from 'lucide-react';
+import { Search, Bell, Menu, Plus, ChevronDown } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -9,6 +9,7 @@ interface HeaderProps {
 }
 
 const defaultAvatar = "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&crop=face";
+const ADMIN_NAME = "BlackQuill";
 
 export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,34 +18,39 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
   const navigate = useNavigate();
 
   const avatar = user?.avatar || defaultAvatar;
+  const isAdmin = user?.role === "admin" && user?.name === ADMIN_NAME;
 
   const handleLogout = () => {
     logout();
     navigate('/login');
     setUserMenuOpen(false);
   };
-
   const handleProfile = () => {
     navigate('/profile');
     setUserMenuOpen(false);
   };
-
   const handleDashboard = () => {
     navigate('/dashboard');
     setUserMenuOpen(false);
   };
-
-  // Optional: handle search (redirect or filter)
+  const handleActivity = () => {
+    navigate('/my-activity');
+    setUserMenuOpen(false);
+  };
+  const handleAdminPanel = () => {
+    navigate('/admin');
+    setUserMenuOpen(false);
+  };
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement search logic (e.g., redirect or filter)
+    // Implement search logic if needed
   };
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Left section */}
+          {/* Left */}
           <div className="flex items-center space-x-4">
             <button 
               onClick={onMenuToggle}
@@ -62,7 +68,6 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
               </h1>
             </Link>
           </div>
-
           {/* Center - Search */}
           <div className="flex-1 max-w-2xl mx-8 hidden md:block">
             <form onSubmit={handleSearchSubmit}>
@@ -78,8 +83,7 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
               </div>
             </form>
           </div>
-
-          {/* Right section */}
+          {/* Right */}
           <div className="flex items-center space-x-4">
             {!user ? (
               <>
@@ -98,7 +102,6 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
               </>
             ) : (
               <>
-                {/* New Thread */}
                 <button
                   onClick={onCreateThread}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
@@ -106,8 +109,6 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
                   <Plus size={16} />
                   <span className="hidden sm:inline">New Thread</span>
                 </button>
-
-                {/* Notifikasi */}
                 <Link
                   to="/notifications"
                   className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors relative"
@@ -118,7 +119,6 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
                     3
                   </span>
                 </Link>
-                
                 {/* Avatar User + Dropdown */}
                 <div className="relative">
                   <button
@@ -132,7 +132,16 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
                       alt="User avatar"
                       className="w-8 h-8 rounded-full border border-gray-300 object-cover"
                     />
-                    <span className="hidden sm:inline font-medium text-gray-900">{user.name}</span>
+                    <span
+                      className={
+                        isAdmin
+                          ? "hidden sm:inline font-bold text-red-600 drop-shadow-[0_0_8px_rgba(255,0,0,0.8)] blur-[0.5px] animate-pulse"
+                          : "hidden sm:inline font-medium text-gray-900"
+                      }
+                      style={isAdmin ? { textShadow: "0 0 10px #ff0000,0 0 20px #ff0000,0 0 40px #f00" } : {}}
+                    >
+                      {user.name}
+                    </span>
                     <ChevronDown size={16} className="text-gray-500" />
                   </button>
                   {userMenuOpen && (
@@ -149,6 +158,20 @@ export default function Header({ onMenuToggle, onCreateThread }: HeaderProps) {
                       >
                         Dashboard
                       </button>
+                      <button
+                        className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
+                        onClick={handleActivity}
+                      >
+                        My Activity
+                      </button>
+                      {isAdmin && (
+                        <button
+                          className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition"
+                          onClick={handleAdminPanel}
+                        >
+                          Admin Panel
+                        </button>
+                      )}
                       <button
                         className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition"
                         onClick={handleLogout}

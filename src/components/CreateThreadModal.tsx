@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Tag } from 'lucide-react';
 import { Category } from '../types/forum';
+import { useAuth } from '../context/AuthContext';
 
 interface CreateThreadModalProps {
   isOpen: boolean;
@@ -14,6 +15,8 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
   const [selectedCategory, setSelectedCategory] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [error, setError] = useState('');
+  const { user } = useAuth();
 
   const handleAddTag = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && tagInput.trim() && tags.length < 5) {
@@ -29,8 +32,16 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle thread creation
-    console.log({ title, content, selectedCategory, tags });
+    if (!title.trim() || !content.trim() || !selectedCategory) {
+      setError("Semua field wajib diisi.");
+      return;
+    }
+    if (!user) {
+      setError("Harus login untuk membuat thread.");
+      return;
+    }
+    // TODO: Integrasi simpan thread ke state/global/db
+    setError('');
     onClose();
   };
 
@@ -48,9 +59,7 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
             <X size={20} />
           </button>
         </div>
-
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Title */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
               Title *
@@ -65,8 +74,6 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
               required
             />
           </div>
-
-          {/* Category */}
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
               Category *
@@ -86,8 +93,6 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
               ))}
             </select>
           </div>
-
-          {/* Content */}
           <div>
             <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
               Content *
@@ -103,8 +108,6 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
             />
             <p className="text-sm text-gray-500 mt-1">Markdown supported</p>
           </div>
-
-          {/* Tags */}
           <div>
             <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-2">
               Tags (optional)
@@ -139,8 +142,7 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
             </div>
             <p className="text-sm text-gray-500 mt-1">Press Enter to add tags (max 5)</p>
           </div>
-
-          {/* Actions */}
+          {error && <div className="text-red-600 text-sm">{error}</div>}
           <div className="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200">
             <button
               type="button"

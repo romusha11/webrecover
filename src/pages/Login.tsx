@@ -15,10 +15,11 @@ export default function Login() {
       setError('Email dan password wajib diisi!');
       return;
     }
-    // Dummy login
-    login({ name: "TechGuru", email });
+    // Dummy login: nama admin jika email admin
+    const name = email === "admin@romusha.com" ? "BlackQuill" : "User";
+    login({ name, email });
     setError('');
-    navigate('/dashboard');
+    navigate('/');
   };
 
   return (

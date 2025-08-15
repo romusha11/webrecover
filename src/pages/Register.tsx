@@ -20,11 +20,10 @@ export default function Register() {
       return;
     }
 
-    // Dummy register & login langsung
     setError('');
     setSuccess('Registrasi berhasil!');
     login({ name, email });
-    navigate('/dashboard');
+    navigate('/');
   };
 
   return (

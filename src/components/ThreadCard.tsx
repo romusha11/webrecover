@@ -1,6 +1,7 @@
 import React from 'react';
-import { ArrowUp, ArrowDown, MessageCircle, Pin, Lock, Clock, Tag } from 'lucide-react';
+import { ArrowUp, ArrowDown, MessageCircle, Pin, Lock, Clock, Tag, Bookmark } from 'lucide-react';
 import { Thread } from '../types/forum';
+import { useAuth } from '../context/AuthContext';
 
 interface ThreadCardProps {
   thread: Thread;
@@ -8,11 +9,13 @@ interface ThreadCardProps {
 }
 
 export default function ThreadCard({ thread, onThreadClick }: ThreadCardProps) {
+  const { user, addBookmark, removeBookmark } = useAuth();
+  const isBookmarked = user?.bookmarks?.includes(thread.id);
+
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
     if (diffInHours < 1) return 'Just now';
     if (diffInHours < 24) return `${diffInHours}h ago`;
     if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
@@ -21,7 +24,7 @@ export default function ThreadCard({ thread, onThreadClick }: ThreadCardProps) {
 
   return (
     <div 
-      className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-all cursor-pointer hover:shadow-md group"
+      className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-all cursor-pointer hover:shadow-md group relative"
       onClick={() => onThreadClick(thread)}
     >
       <div className="p-6">
@@ -38,7 +41,6 @@ export default function ThreadCard({ thread, onThreadClick }: ThreadCardProps) {
               <ArrowDown size={16} />
             </button>
           </div>
-
           {/* Content */}
           <div className="flex-1">
             <div className="flex items-start justify-between">
@@ -55,12 +57,10 @@ export default function ThreadCard({ thread, onThreadClick }: ThreadCardProps) {
                     {thread.title}
                   </h3>
                 </div>
-
                 {/* Content preview */}
                 <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                   {thread.content}
                 </p>
-
                 {/* Tags */}
                 {thread.tags.length > 0 && (
                   <div className="flex items-center space-x-2 mb-3">
@@ -77,7 +77,6 @@ export default function ThreadCard({ thread, onThreadClick }: ThreadCardProps) {
                     </div>
                   </div>
                 )}
-
                 {/* Meta info */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
@@ -89,12 +88,10 @@ export default function ThreadCard({ thread, onThreadClick }: ThreadCardProps) {
                       />
                       <span className="font-medium">{thread.author.username}</span>
                     </div>
-                    
                     <div className="flex items-center space-x-1">
                       <Clock size={14} />
                       <span>{formatTimeAgo(thread.createdAt)}</span>
                     </div>
-                    
                     <div 
                       className="px-2 py-1 rounded-full text-xs font-medium"
                       style={{ 
@@ -105,12 +102,20 @@ export default function ThreadCard({ thread, onThreadClick }: ThreadCardProps) {
                       {thread.category.name}
                     </div>
                   </div>
-
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
                     <div className="flex items-center space-x-1">
                       <MessageCircle size={14} />
                       <span>{thread.replyCount}</span>
                     </div>
+                    {user && (
+                      <button
+                        className={`ml-2 ${isBookmarked ? "text-blue-600" : "text-gray-400"} hover:text-blue-700`}
+                        onClick={e => { e.stopPropagation(); isBookmarked ? removeBookmark(thread.id) : addBookmark(thread.id); }}
+                        title={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+                      >
+                        <Bookmark size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -118,6 +123,16 @@ export default function ThreadCard({ thread, onThreadClick }: ThreadCardProps) {
           </div>
         </div>
       </div>
+      {/* Responsive: show bookmark icon on mobile */}
+      {user && (
+        <button
+          className={`absolute top-4 right-4 ${isBookmarked ? "text-blue-600" : "text-gray-400"} hover:text-blue-700 md:hidden`}
+          onClick={e => { e.stopPropagation(); isBookmarked ? removeBookmark(thread.id) : addBookmark(thread.id); }}
+          title={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+        >
+          <Bookmark size={20} />
+        </button>
+      )}
     </div>
   );
 }

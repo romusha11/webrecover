@@ -23,7 +23,7 @@ export default function Sidebar({ categories, selectedCategory, onCategorySelect
   const { user } = useAuth();
 
   return (
-    <aside className={`fixed md:static inset-y-0 left-0 z-40 w-64 bg-gray-50 border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+    <aside className={`fixed md:static inset-y-0 left-0 z-40 w-64 bg-gray-50 border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
       <div className="h-full overflow-y-auto p-4">
         {/* Navigation */}
         <nav className="space-y-2 mb-8">
@@ -37,7 +37,6 @@ export default function Sidebar({ categories, selectedCategory, onCategorySelect
               <span>Dashboard</span>
             </Link>
           )}
-
           <button
             onClick={() => onCategorySelect(null)}
             className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
@@ -49,18 +48,15 @@ export default function Sidebar({ categories, selectedCategory, onCategorySelect
             <Home size={20} />
             <span className="font-medium">All Threads</span>
           </button>
-          
           <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-700 hover:bg-gray-100 transition-colors">
             <TrendingUp size={20} />
             <span className="font-medium">Trending</span>
           </button>
-          
           <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-700 hover:bg-gray-100 transition-colors">
             <Users size={20} />
             <span className="font-medium">Following</span>
           </button>
         </nav>
-
         {/* Categories */}
         <div>
           <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Categories</h3>
@@ -97,7 +93,6 @@ export default function Sidebar({ categories, selectedCategory, onCategorySelect
             })}
           </div>
         </div>
-
         {/* Stats */}
         <div className="mt-8 p-4 bg-white rounded-lg border border-gray-200">
           <h4 className="font-semibold text-gray-900 mb-2">Community Stats</h4>
