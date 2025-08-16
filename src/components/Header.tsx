@@ -1,5 +1,6 @@
-import React from 'react';
-import { Bell, Menu } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Bell, Search, User, Menu, LogOut, Settings, Grid, BarChart2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface HeaderProps {
@@ -9,72 +10,119 @@ interface HeaderProps {
 
 export default function Header({ onAuthClick, onMenuToggle }: HeaderProps) {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [searchInput, setSearchInput] = useState('');
+
+  // Handle search submit
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchInput.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchInput.trim())}`);
+      setSearchInput('');
+    }
+  };
 
   return (
     <header
-      className="border-b shadow-sm flex items-center justify-between px-3 sm:px-6 md:px-10 py-2 sticky top-0 z-50 w-full bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] border-gray-900"
-      aria-label="Romusha Main Header"
+      className="border-b shadow-sm flex items-center justify-between px-2 sm:px-4 md:px-6 py-3 sticky top-0 z-50 w-full bg-[#111] border-[#191919]"
+      aria-label="Header navigasi utama"
     >
-      {/* Kiri: Logo & Menu */}
-      <div className="flex items-center gap-2">
-        {/* Mobile menu button */}
+      {/* Menu & Logo */}
+      <div className="flex items-center gap-4">
         <button
-          className="md:hidden p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="md:hidden p-2 rounded"
           style={{ color: '#4a74ff', background: '#181818' }}
           onClick={onMenuToggle}
-          aria-label="Buka menu utama"
+          aria-label="Buka menu"
         >
-          <Menu size={26} />
+          <Menu size={24} />
         </button>
-        <a href="/" className="font-black text-xl sm:text-2xl tracking-tight" style={{ color: '#fff' }}>
-          Romusha
-        </a>
+        <Link to="/" className="font-extrabold tracking-wide text-xl sm:text-2xl text-white hover:text-blue-400 transition">
+          ROMUSHA
+        </Link>
       </div>
-      {/* Tengah: Search (responsive) */}
-      <div className="flex-1 mx-2 max-w-lg hidden md:flex">
+
+      {/* Center: Search */}
+      <form className="flex-1 flex justify-center" onSubmit={handleSearch} style={{ maxWidth: 360 }}>
         <input
           type="text"
+          value={searchInput}
+          onChange={e => setSearchInput(e.target.value)}
           placeholder="Cari thread, user, topik..."
-          className="w-full rounded-lg px-3 py-2 text-sm bg-[#181818] border border-[#282828] text-[#4a74ff] placeholder:text-[#9ca3af] outline-none focus:ring-2 focus:ring-blue-500 transition"
-          aria-label="Cari thread, user, atau topik"
+          className="rounded px-3 py-1 text-sm w-full border"
+          style={{ background: '#181818', color: '#4a74ff', borderColor: '#282828' }}
+          aria-label="Cari thread, user, topik"
         />
-      </div>
-      {/* Kanan: Notif, Auth */}
-      <div className="flex items-center gap-2 sm:gap-4">
-        {/* Search for mobile */}
-        <div className="md:hidden">
-          <input
-            type="text"
-            placeholder="Cari..."
-            className="rounded px-2 py-1 text-xs min-w-[80px] border bg-[#181818] text-[#4a74ff] border-[#282828] outline-none"
-          />
-        </div>
-        <button className="relative hover:bg-[#181818] p-2 rounded-lg transition" style={{ color: '#4a74ff' }} aria-label="Notifikasi">
-          <Bell size={22} />
-          {/* Badge notif (dummy) */}
-          <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+        <button
+          type="submit"
+          className="ml-2 p-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+          aria-label="Cari"
+        >
+          <Search size={20} />
         </button>
-        {user ? (
-          <div className="flex items-center gap-2 sm:gap-3">
-            <span className="font-semibold text-base sm:text-lg text-white truncate max-w-[120px] sm:max-w-[200px]">{user.name}</span>
+      </form>
+
+      {/* Right: Aksi & User */}
+      <nav className="flex items-center gap-3">
+        <Link
+          to="/notifications"
+          className="text-blue-400 hover:text-blue-600 transition relative"
+          aria-label="Notifications"
+        >
+          <Bell size={22} />
+        </Link>
+        {user && (
+          <>
+            <Link
+              to="/dashboard"
+              className="text-gray-400 hover:text-blue-600 transition hidden sm:inline"
+              aria-label="Dashboard"
+            >
+              <Grid size={22} />
+            </Link>
+            <Link
+              to="/settings"
+              className="text-gray-400 hover:text-blue-600 transition hidden sm:inline"
+              aria-label="Settings"
+            >
+              <Settings size={22} />
+            </Link>
+            {user.role === 'admin' && (
+              <Link
+                to="/analytics"
+                className="text-yellow-400 hover:text-yellow-600 transition hidden sm:inline"
+                aria-label="Analytics"
+              >
+                <BarChart2 size={22} />
+              </Link>
+            )}
+            <Link
+              to="/profile"
+              className="text-blue-400 hover:text-blue-600 transition flex items-center gap-1"
+              aria-label="Profile"
+            >
+              <User size={22} />
+              <span className="font-semibold text-base text-white hidden sm:inline">{user.name}</span>
+            </Link>
             <button
-              onClick={logout}
-              className="px-3 py-1 rounded-lg text-sm font-semibold border border-[#282828] bg-[#181818] text-white hover:bg-[#282828] transition"
+              onClick={() => { logout(); navigate('/'); }}
+              className="ml-2 px-3 py-1 rounded text-sm bg-red-600 text-white hover:bg-red-700 border border-[#282828]"
               aria-label="Logout"
             >
-              Logout
+              <LogOut size={18} className="inline" /> <span className="hidden sm:inline">Logout</span>
             </button>
-          </div>
-        ) : (
+          </>
+        )}
+        {!user && (
           <button
             onClick={onAuthClick}
-            className="px-4 py-1 rounded-lg font-semibold text-sm border border-[#282828] bg-[#181818] text-white hover:bg-[#282828] transition"
+            className="px-4 py-1 rounded-lg font-medium text-sm bg-blue-600 text-white border border-[#282828] hover:bg-blue-700 transition"
             aria-label="Login atau Register"
           >
             Login / Register
           </button>
         )}
-      </div>
+      </nav>
     </header>
   );
 }
