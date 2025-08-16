@@ -216,4 +216,4 @@ export default function ThreadView({ thread, onBack }: ThreadViewProps) {
       </div>
     </div>
   );
-                    }}
+}
