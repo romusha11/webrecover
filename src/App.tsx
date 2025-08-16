@@ -7,6 +7,13 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import AdminPanel from './pages/AdminPanel';
 import MyActivity from './pages/MyActivity';
+import Categories from './pages/Categories';
+import Search from './pages/Search';
+import Notifications from './pages/Notifications';
+import AccountSettings from './pages/AccountSettings';
+import Analytics from './pages/Analytics';
+import ThreadDetail from './pages/ThreadDetail';
+import UserProfile from './pages/UserProfile';
 import { useAuth } from './context/AuthContext';
 import LoginRegisterModal from './components/LoginRegisterModal';
 
@@ -82,11 +89,67 @@ export default function App() {
                 }
               />
               <Route
+                path="/categories"
+                element={
+                  <ProtectedRoute>
+                    <Categories />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/search"
+                element={
+                  <ProtectedRoute>
+                    <Search />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/notifications"
+                element={
+                  <ProtectedRoute>
+                    <Notifications />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <AccountSettings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/analytics"
+                element={
+                  <AdminProtectedRoute>
+                    <Analytics />
+                  </AdminProtectedRoute>
+                }
+              />
+              <Route
                 path="/admin"
                 element={
                   <AdminProtectedRoute>
                     <AdminPanel />
                   </AdminProtectedRoute>
+                }
+              />
+              <Route
+                path="/thread/:threadId"
+                element={
+                  <ProtectedRoute>
+                    <ThreadDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/:username"
+                element={
+                  <ProtectedRoute>
+                    <UserProfile />
+                  </ProtectedRoute>
                 }
               />
               <Route path="*" element={<Navigate to="/" />} />
