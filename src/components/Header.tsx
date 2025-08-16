@@ -12,37 +12,55 @@ export default function Header({ onAuthClick, onMenuToggle }: HeaderProps) {
 
   return (
     <header
-      className="border-b shadow-sm flex items-center justify-between px-2 sm:px-4 md:px-6 py-3 sticky top-0 z-50 w-full"
-      style={{ background: '#111', borderColor: '#191919' }}
+      className="border-b shadow-sm flex items-center justify-between px-3 sm:px-6 md:px-10 py-2 sticky top-0 z-50 w-full bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] border-gray-900"
+      aria-label="Romusha Main Header"
     >
-      <div className="flex items-center space-x-4">
+      {/* Kiri: Logo & Menu */}
+      <div className="flex items-center gap-2">
+        {/* Mobile menu button */}
         <button
-          className="md:hidden p-2 rounded"
+          className="md:hidden p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           style={{ color: '#4a74ff', background: '#181818' }}
           onClick={onMenuToggle}
-          aria-label="Buka menu"
+          aria-label="Buka menu utama"
         >
-          <Menu size={24} />
+          <Menu size={26} />
         </button>
-        <span className="font-extrabold tracking-wide text-xl sm:text-2xl" style={{ color: '#fff' }}>Romusha</span>
+        <a href="/" className="font-black text-xl sm:text-2xl tracking-tight" style={{ color: '#fff' }}>
+          Romusha
+        </a>
       </div>
-      <div className="flex items-center space-x-2 sm:space-x-4">
+      {/* Tengah: Search (responsive) */}
+      <div className="flex-1 mx-2 max-w-lg hidden md:flex">
         <input
           type="text"
           placeholder="Cari thread, user, topik..."
-          className="rounded px-2 py-1 text-sm min-w-[120px] sm:min-w-[180px] border hidden sm:block"
-          style={{ background: '#181818', color: '#4a74ff', borderColor: '#282828' }}
+          className="w-full rounded-lg px-3 py-2 text-sm bg-[#181818] border border-[#282828] text-[#4a74ff] placeholder:text-[#9ca3af] outline-none focus:ring-2 focus:ring-blue-500 transition"
+          aria-label="Cari thread, user, atau topik"
         />
-        <button className="relative" style={{ color: '#4a74ff' }} aria-label="Notif">
-          <Bell size={20} />
+      </div>
+      {/* Kanan: Notif, Auth */}
+      <div className="flex items-center gap-2 sm:gap-4">
+        {/* Search for mobile */}
+        <div className="md:hidden">
+          <input
+            type="text"
+            placeholder="Cari..."
+            className="rounded px-2 py-1 text-xs min-w-[80px] border bg-[#181818] text-[#4a74ff] border-[#282828] outline-none"
+          />
+        </div>
+        <button className="relative hover:bg-[#181818] p-2 rounded-lg transition" style={{ color: '#4a74ff' }} aria-label="Notifikasi">
+          <Bell size={22} />
+          {/* Badge notif (dummy) */}
+          <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
         </button>
         {user ? (
           <div className="flex items-center gap-2 sm:gap-3">
-            <span className="font-semibold text-base sm:text-lg" style={{ color: '#fff' }}>{user.name}</span>
+            <span className="font-semibold text-base sm:text-lg text-white truncate max-w-[120px] sm:max-w-[200px]">{user.name}</span>
             <button
               onClick={logout}
-              className="px-2 py-1 rounded text-sm"
-              style={{ background: '#181818', color: '#fff', border: '1px solid #282828' }}
+              className="px-3 py-1 rounded-lg text-sm font-semibold border border-[#282828] bg-[#181818] text-white hover:bg-[#282828] transition"
+              aria-label="Logout"
             >
               Logout
             </button>
@@ -50,8 +68,8 @@ export default function Header({ onAuthClick, onMenuToggle }: HeaderProps) {
         ) : (
           <button
             onClick={onAuthClick}
-            className="px-3 py-1 sm:px-4 rounded-lg font-medium text-sm"
-            style={{ background: '#181818', color: '#fff', border: '1px solid #282828' }}
+            className="px-4 py-1 rounded-lg font-semibold text-sm border border-[#282828] bg-[#181818] text-white hover:bg-[#282828] transition"
+            aria-label="Login atau Register"
           >
             Login / Register
           </button>
