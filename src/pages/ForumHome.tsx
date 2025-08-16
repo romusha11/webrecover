@@ -14,11 +14,13 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  // Filter threads by selected category
   const filteredThreads = useMemo(() => {
     if (!selectedCategory) return mockThreads;
     return mockThreads.filter(thread => thread.category.id === selectedCategory);
   }, [selectedCategory]);
 
+  // Sort: pinned first, then terbaru
   const sortedThreads = useMemo(() => {
     return [...filteredThreads].sort((a, b) => {
       if (a.isPinned && !b.isPinned) return -1;
@@ -29,53 +31,54 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
 
   const handleThreadClick = (thread: Thread) => {
     setSelectedThread(thread);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const handleBackToThreads = () => {
     setSelectedThread(null);
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <main className="max-w-5xl mx-auto px-2 sm:px-4 py-4 min-h-screen">
+      {/* Header: Kategori & Filter */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-2" style={{ color: '#fff' }}>
+        <h2 className="text-2xl font-extrabold mb-2 text-[#181818] dark:text-white">
           {selectedCategory
             ? mockCategories.find(c => c.id === selectedCategory)?.name
             : 'All Threads'
           }
         </h2>
-        <p style={{ color: '#4a74ff' }}>
+        <p className="text-[#4a74ff]">
           {selectedCategory
             ? mockCategories.find(c => c.id === selectedCategory)?.description
-            : 'Diskusi dan partisipasi di semua topik'
+            : 'Diskusi dan partisipasi semua topik'
           }
         </p>
       </div>
-      <div className="flex items-center justify-between mb-6 p-4 rounded-lg border border-gray-200" style={{ background: '#181818', borderColor: '#222' }}>
-        <div className="flex items-center space-x-4">
+      {/* Filter & New Thread */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mb-6 p-4 rounded-lg border border-gray-200 bg-[#181818] border-[#222]">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
           <select
-            className="border rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-            style={{ background: '#181818', color: '#4a74ff', borderColor: '#282828' }}
+            className="border rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-[#181818] text-[#4a74ff] border-[#282828] transition w-[160px]"
             onChange={e => onCategorySelect(e.target.value || null)}
             value={selectedCategory || ""}
+            aria-label="Filter kategori"
           >
             <option value="">All Categories</option>
             {mockCategories.map(cat => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </select>
-          <div className="flex items-center space-x-2 text-sm" style={{ color: '#4a74ff' }}>
-            <span>Showing {sortedThreads.length} threads</span>
-          </div>
+          <span className="text-sm text-[#4a74ff]">{sortedThreads.length} threads</span>
         </div>
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
-          style={{ background: '#181818', color: '#fff', border: '1px solid #282828' }}
+          className="px-4 py-2 rounded-lg font-semibold text-sm border border-[#282828] bg-[#181818] text-white hover:bg-[#4a74ff] transition"
         >
           New Thread
         </button>
       </div>
-      <div className="space-y-4">
+      {/* List Thread / Thread View */}
+      <section className="space-y-4">
         {selectedThread ? (
           <ThreadView thread={selectedThread} onBack={handleBackToThreads} />
         ) : sortedThreads.length > 0 ? (
@@ -87,28 +90,28 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
             />
           ))
         ) : (
-          <div className="text-center py-12 rounded-lg border border-gray-200" style={{ background: '#181818', borderColor: '#222' }}>
-            <h3 className="text-lg font-medium mb-2" style={{ color: '#fff' }}>No threads found</h3>
-            <p style={{ color: '#4a74ff' }} className="mb-4">
+          <div className="text-center py-12 rounded-lg border border-gray-200 bg-[#181818] border-[#222]">
+            <h3 className="text-lg font-semibold mb-2 text-white">No threads found</h3>
+            <p className="text-[#4a74ff] mb-4">
               {selectedCategory
                 ? 'Belum ada thread di kategori ini. Jadilah yang pertama!'
                 : 'Tidak ada thread yang cocok dengan filter.'}
             </p>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="px-6 py-2 rounded-lg font-medium transition-colors"
-              style={{ background: '#181818', color: '#fff', border: '1px solid #282828' }}
+              className="px-6 py-2 rounded-lg font-semibold text-white border border-[#282828] bg-[#181818] hover:bg-[#4a74ff] transition"
             >
               Create First Thread
             </button>
           </div>
         )}
-      </div>
+      </section>
+      {/* Modal Create Thread */}
       <CreateThreadModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         categories={mockCategories}
       />
-    </div>
+    </main>
   );
 }
