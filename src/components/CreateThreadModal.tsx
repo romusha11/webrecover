@@ -16,6 +16,7 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
   // Add tag (max 5, enter key)
@@ -32,8 +33,9 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
   };
 
   // Submit create thread
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     if (!title.trim() || !content.trim() || !selectedCategory) {
       setError("Semua field wajib diisi.");
       return;
@@ -42,14 +44,60 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
       setError("Harus login untuk membuat thread.");
       return;
     }
-    // TODO: Integrasi simpan thread ke state/global/db
-    setTitle('');
-    setContent('');
-    setSelectedCategory('');
-    setTags([]);
-    setTagInput('');
-    setError('');
-    onClose();
+    setLoading(true);
+    try {
+      // Find selected category object
+      const categoryObj = categories.find(cat => cat.id === selectedCategory);
+      if (!categoryObj) {
+        setError("Kategori tidak valid.");
+        setLoading(false);
+        return;
+      }
+
+      // Prepare thread data
+      const threadData = {
+        title: title.trim(),
+        content: content.trim(),
+        author: {
+          id: user.id,
+          username: user.username,
+          avatar: user.avatar,
+          reputation: user.reputation,
+        },
+        category: categoryObj,
+        tags,
+        isPinned: false,
+        isLocked: false,
+        votes: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // POST ke backend
+      const res = await fetch('http://localhost:3000/threads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(threadData),
+      });
+      if (!res.ok) {
+        setError('Gagal membuat thread');
+        setLoading(false);
+        return;
+      }
+
+      // Reset form & tutup modal
+      setTitle('');
+      setContent('');
+      setSelectedCategory('');
+      setTags([]);
+      setTagInput('');
+      setError('');
+      setLoading(false);
+      onClose();
+    } catch (err) {
+      setError('Gagal membuat thread');
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -83,6 +131,7 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none font-semibold"
               required
               autoFocus
+              disabled={loading}
             />
           </div>
           <div>
@@ -95,6 +144,7 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none font-semibold"
               required
+              disabled={loading}
             >
               <option value="">Pilih kategori</option>
               {categories.map((category) => (
@@ -116,6 +166,7 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
               rows={8}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none font-semibold resize-none"
               required
+              disabled={loading}
             />
             <p className="text-xs text-gray-400 mt-1">Markdown supported</p>
           </div>
@@ -136,6 +187,7 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
                       onClick={() => handleRemoveTag(index)}
                       className="hover:bg-blue-200 rounded-full p-0.5 transition"
                       aria-label="Remove tag"
+                      disabled={loading}
                     >
                       <X size={12} />
                     </button>
@@ -148,7 +200,7 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleAddTag}
                 placeholder={tags.length < 5 ? "Tambah tag dan tekan Enter" : "Max 5 tags"}
-                disabled={tags.length >= 5}
+                disabled={tags.length >= 5 || loading}
                 className="w-full outline-none font-semibold"
               />
             </div>
@@ -161,16 +213,17 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
               onClick={onClose}
               className="px-4 py-2 text-gray-700 hover:text-blue-700 font-semibold transition"
               aria-label="Batal"
+              disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={!title.trim() || !content.trim() || !selectedCategory}
+              disabled={!title.trim() || !content.trim() || !selectedCategory || loading}
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-6 py-2 rounded-lg font-bold transition"
               aria-label="Buat thread"
             >
-              Create Thread
+              {loading ? 'Creating...' : 'Create Thread'}
             </button>
           </div>
         </form>

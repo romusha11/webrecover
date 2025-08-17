@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import { ArrowLeft, ArrowUp, ArrowDown, MessageCircle, Share, MoreHorizontal, Clock, Tag, Pin, Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  ArrowLeft, ArrowUp, ArrowDown, MessageCircle, Share,
+  MoreHorizontal, Clock, Tag, Pin, Lock
+} from 'lucide-react';
 import { Thread, Reply } from '../types/forum';
 
 interface ThreadViewProps {
@@ -7,8 +10,25 @@ interface ThreadViewProps {
   onBack: () => void;
 }
 
-// Komponen Reply (nested, responsive)
-function ReplyComponent({ reply, depth = 0 }: { reply: Reply; depth?: number }) {
+interface Author {
+  id: string;
+  username: string;
+  avatar: string;
+  reputation: number;
+}
+
+interface ReplyAPI {
+  id: string;
+  threadId: string;
+  author: Author;
+  content: string;
+  votes: number;
+  createdAt: string;
+  replies?: ReplyAPI[];
+}
+
+// Komponen Reply (nested, responsive, konsisten, rapi)
+function ReplyComponent({ reply, depth = 0 }: { reply: ReplyAPI; depth?: number }) {
   const [showReplies, setShowReplies] = useState(true);
 
   // Format waktu reply
@@ -24,7 +44,7 @@ function ReplyComponent({ reply, depth = 0 }: { reply: Reply; depth?: number }) 
   };
 
   return (
-    <div className={`${depth > 0 ? 'ml-6 border-l-2 border-gray-100 pl-4' : ''}`}>
+    <div className={depth > 0 ? 'ml-6 border-l-2 border-gray-100 pl-4' : ''}>
       <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
         <div className="flex items-start gap-3">
           {/* Voting reply */}
@@ -76,6 +96,9 @@ function ReplyComponent({ reply, depth = 0 }: { reply: Reply; depth?: number }) 
 
 export default function ThreadView({ thread, onBack }: ThreadViewProps) {
   const [replyText, setReplyText] = useState('');
+  const [replies, setReplies] = useState<ReplyAPI[]>([]);
+  const [loadingReplies, setLoadingReplies] = useState(true);
+  const [errorReplies, setErrorReplies] = useState('');
 
   // Format waktu thread
   const formatTimeAgo = (dateString: string) => {
@@ -87,6 +110,49 @@ export default function ThreadView({ thread, onBack }: ThreadViewProps) {
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}j lalu`;
     if (diffInMinutes < 10080) return `${Math.floor(diffInMinutes / 1440)}h lalu`;
     return `${Math.floor(diffInMinutes / 10080)}mgg lalu`;
+  };
+
+  // Fetch replies dari backend
+  useEffect(() => {
+    setLoadingReplies(true);
+    setErrorReplies('');
+    fetch(`http://localhost:3000/replies?threadId=${thread.id}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Gagal mengambil data balasan');
+        return res.json();
+      })
+      .then(data => {
+        setReplies(Array.isArray(data) ? data : []);
+        setLoadingReplies(false);
+      })
+      .catch(err => {
+        setErrorReplies('Gagal mengambil data balasan');
+        setLoadingReplies(false);
+      });
+  }, [thread.id]);
+
+  // Submit reply ke backend
+  const handleSubmitReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyText.trim()) return;
+    try {
+      const res = await fetch('http://localhost:3000/replies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          threadId: thread.id,
+          author: thread.author, // Untuk demo, gunakan author thread. Sebenarnya ambil dari user yang login.
+          content: replyText.trim()
+        }),
+      });
+      if (!res.ok) throw new Error('Gagal menambah balasan');
+      setReplyText('');
+      // Refresh balasan
+      fetch(`http://localhost:3000/replies?threadId=${thread.id}`)
+        .then(r => r.json()).then(setReplies);
+    } catch {
+      setErrorReplies('Gagal menambah balasan');
+    }
   };
 
   return (
@@ -137,9 +203,9 @@ export default function ThreadView({ thread, onBack }: ThreadViewProps) {
                   <Clock size={14} />
                   <span>{formatTimeAgo(thread.createdAt)}</span>
                 </div>
-                <div 
+                <div
                   className="px-3 py-1 rounded-full text-xs font-bold"
-                  style={{ 
+                  style={{
                     backgroundColor: `${thread.category.color}20`,
                     color: thread.category.color
                   }}
@@ -167,7 +233,7 @@ export default function ThreadView({ thread, onBack }: ThreadViewProps) {
               <div className="flex items-center gap-4 pt-4 border-t border-gray-100 text-sm">
                 <button className="flex items-center gap-1 text-blue-600 hover:text-blue-900 transition font-semibold" aria-label="Reply">
                   <MessageCircle size={16} />
-                  <span>{thread.replyCount} replies</span>
+                  <span>{replies.length} replies</span>
                 </button>
                 <button className="flex items-center gap-1 text-gray-500 hover:text-blue-600 transition" aria-label="Share thread">
                   <Share size={16} />
@@ -184,10 +250,14 @@ export default function ThreadView({ thread, onBack }: ThreadViewProps) {
       {/* Replies */}
       <div className="space-y-4 mb-8">
         <h2 className="text-xl font-black text-gray-900 mb-2">
-          Replies ({thread.replyCount})
+          Replies ({replies.length})
         </h2>
-        {thread.replies.length > 0 ? (
-          thread.replies.map((reply) => (
+        {loadingReplies ? (
+          <div className="text-blue-500 font-medium text-center py-4">Loading replies...</div>
+        ) : errorReplies ? (
+          <div className="text-red-500 font-medium text-center py-4">{errorReplies}</div>
+        ) : replies.length > 0 ? (
+          replies.map((reply) => (
             <ReplyComponent key={reply.id} reply={reply} />
           ))
         ) : (
@@ -195,7 +265,7 @@ export default function ThreadView({ thread, onBack }: ThreadViewProps) {
         )}
       </div>
       {/* Form reply */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+      <form className="bg-white rounded-xl border border-gray-200 p-6 mb-8" onSubmit={handleSubmitReply}>
         <h3 className="text-lg font-bold text-gray-900 mb-4">Add your reply</h3>
         <textarea
           value={replyText}
@@ -207,13 +277,14 @@ export default function ThreadView({ thread, onBack }: ThreadViewProps) {
         <div className="flex items-center justify-between mt-4">
           <div className="text-xs text-gray-400">Markdown supported</div>
           <button
+            type="submit"
             disabled={!replyText.trim()}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-6 py-2 rounded-lg font-bold transition"
           >
             Post Reply
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

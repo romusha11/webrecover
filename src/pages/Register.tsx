@@ -6,23 +6,44 @@ export default function Register({ onSuccess }: { onSuccess?: () => void }) {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !name) {
+    setError('');
+    if (!email.trim() || !password.trim() || !name.trim()) {
       setError('Semua field wajib diisi!');
       return;
     }
-    setError('');
-    login({ name, email });
-    if (onSuccess) onSuccess();
+    setLoading(true);
+    try {
+      // POST ke backend register
+      const res = await fetch('http://localhost:3000/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: name.trim(), email: email.trim(), password: password.trim() }),
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        setError(errData?.error || 'Gagal register!');
+        setLoading(false);
+        return;
+      }
+      const user = await res.json();
+      login(user);
+      setLoading(false);
+      if (onSuccess) onSuccess();
+    } catch {
+      setError('Gagal register, coba lagi nanti.');
+      setLoading(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-xl font-bold mb-4 text-center" style={{ color: '#7b90ff' }}>Register Romusha</h2>
-      {error && <div className="mb-2" style={{ color: '#7b90ff' }}>{error}</div>}
+      {error && <div className="mb-2" style={{ color: '#ff3333' }}>{error}</div>}
       <div>
         <label className="block text-sm font-medium mb-1" style={{ color: '#7b90ff' }}>Nama</label>
         <input
@@ -32,6 +53,7 @@ export default function Register({ onSuccess }: { onSuccess?: () => void }) {
           onChange={e => setName(e.target.value)}
           required
           autoFocus
+          disabled={loading}
           style={{ background: '#181818', color: '#8a6cff', borderColor: '#282828' }}
         />
       </div>
@@ -43,6 +65,7 @@ export default function Register({ onSuccess }: { onSuccess?: () => void }) {
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
+          disabled={loading}
           style={{ background: '#181818', color: '#8a6cff', borderColor: '#282828' }}
         />
       </div>
@@ -54,15 +77,17 @@ export default function Register({ onSuccess }: { onSuccess?: () => void }) {
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
+          disabled={loading}
           style={{ background: '#181818', color: '#8a6cff', borderColor: '#282828' }}
         />
       </div>
       <button
         type="submit"
+        disabled={!name.trim() || !email.trim() || !password.trim() || loading}
         className="w-full rounded-lg font-semibold transition-colors"
         style={{ background: '#181818', color: '#7b90ff', border: '1px solid #282828' }}
       >
-        Register
+        {loading ? 'Registering...' : 'Register'}
       </button>
     </form>
   );
