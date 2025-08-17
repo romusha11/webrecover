@@ -1,9 +1,15 @@
 const express = require('express');
 const fs = require('fs');
 const cors = require('cors');
+const crypto = require('crypto'); // Tambahkan ini!
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Fungsi untuk hash password
+function hashPassword(password) {
+  return crypto.createHash('sha256').update(password).digest('hex');
+}
 
 // USERS
 const USERS_FILE = './users.json';
@@ -21,19 +27,25 @@ app.post('/users', (req, res) => {
   if (!username || !email || !password) return res.status(400).json({ error: 'Semua field wajib diisi' });
   const users = loadUsers();
   if (users.find(u => u.email === email)) return res.status(400).json({ error: 'Email sudah terpakai' });
-  const newUser = { id: Date.now(), username, email, password, bookmarks: [] };
+  const hashed = hashPassword(password);
+  const newUser = { id: Date.now(), username, email, password: hashed, bookmarks: [] };
   users.push(newUser);
   saveUsers(users);
-  res.json(newUser);
+  // Jangan kirim password ke frontend
+  const { password: pw, ...userNoPw } = newUser;
+  res.json(userNoPw);
 });
 
 // LOGIN
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   const users = loadUsers();
-  const user = users.find(u => u.email === email && u.password === password);
+  const hashed = hashPassword(password);
+  const user = users.find(u => u.email === email && u.password === hashed);
   if (!user) return res.status(401).json({ error: 'Email/password salah' });
-  res.json({ id: user.id, username: user.username, email: user.email, bookmarks: user.bookmarks || [] });
+  // Jangan kirim password ke frontend
+  const { password: pw, ...userNoPw } = user;
+  res.json(userNoPw);
 });
 
 // BOOKMARK
