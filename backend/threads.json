@@ -1,12 +1,23 @@
 [
   {
-    "id": 1755332190064,
-    "title": "Malware Stealer",
-    "content": "Di sini kamu bisa melakukan distribusikan Software jenis apapun, harap mencantumkan kontak Telegram untuk komunikasi lebih lanjut",
+    "id": 1755489018154,
+    "title": "Mencari Malware Stealer",
+    "content": "Cari malware stealer cantumkan kontak telegram kalian",
     "author": {
       "avatar": "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=identicon",
       "reputation": 0
     },
-    "createdAt": 1755332190064
+    "category": {
+      "id": "c1",
+      "name": "General",
+      "description": "Diskusi umum dan pengumuman.",
+      "color": "#4a74ff"
+    },
+    "tags": [],
+    "isPinned": false,
+    "isLocked": false,
+    "votes": 0,
+    "createdAt": "2025-08-18T03:50:18.128Z",
+    "updatedAt": "2025-08-18T03:50:18.128Z"
   }
 ]

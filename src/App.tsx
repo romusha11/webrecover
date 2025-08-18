@@ -16,6 +16,8 @@ import ThreadDetail from './pages/ThreadDetail';
 import UserProfile from './pages/UserProfile';
 import { useAuth } from './context/AuthContext';
 import LoginRegisterModal from './components/LoginRegisterModal';
+import BindDevice from './pages/BindDevice';
+import Register from './pages/Register';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -25,17 +27,14 @@ function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   return user && user.role === "admin" ? <>{children}</> : <Navigate to="/" />;
 }
-
 export default function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
   React.useEffect(() => {
     document.body.style.overflow = (isSidebarOpen || authModalOpen) ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [isSidebarOpen, authModalOpen]);
-
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-gray-50">
@@ -64,6 +63,8 @@ export default function App() {
                   onCategorySelect={setSelectedCategory}
                 />
               } />
+              <Route path="/register" element={<Register />} />
+              <Route path="/bind-device" element={<BindDevice />} />
               <Route
                 path="/dashboard"
                 element={
