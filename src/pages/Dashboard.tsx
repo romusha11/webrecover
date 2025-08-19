@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate, Link } from 'react-router-dom';
-import { mockUsers } from '../data/mockData';
 
 export default function Dashboard() {
   const { user, updateBalance } = useAuth();

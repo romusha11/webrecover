@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockUsers, mockThreads } from '../data/mockData';
 import { ArrowLeft, MessageSquare, Bookmark, UserPlus, UserMinus } from 'lucide-react';
 
 export default function UserProfile() {

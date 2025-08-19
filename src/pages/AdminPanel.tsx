@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { mockUsers, mockThreads, mockCategories } from '../data/mockData';
 import { Navigate } from 'react-router-dom';
 import { Trash2, Edit2, UserCheck, UserX, Lock, Pin } from 'lucide-react';
 

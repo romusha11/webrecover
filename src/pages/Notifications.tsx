@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Bell, CheckCircle2, Trash2, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { mockNotifications } from '../data/mockData';
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState(mockNotifications);

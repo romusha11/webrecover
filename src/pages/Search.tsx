@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { mockThreads, mockCategories, mockUsers } from '../data/mockData';
 import { Search as SearchIcon, User, Tag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

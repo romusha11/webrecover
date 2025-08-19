@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockThreads, mockReplies, mockUsers } from '../data/mockData';
 import { Bookmark, Share2, ArrowLeft, Edit2, Trash2, Send, User } from 'lucide-react';
 
 export default function ThreadDetail() {

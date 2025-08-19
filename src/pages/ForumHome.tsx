@@ -3,12 +3,15 @@ import ThreadCard from '../components/ThreadCard';
 import ThreadView from '../components/ThreadView';
 import CreateThreadModal from '../components/CreateThreadModal';
 import { Thread } from '../types/forum';
+import EditThreadModal from '../components/EditThreadModal';
 
-interface Category {
+interface CategoryNode {
   id: string;
   name: string;
   description: string;
   color?: string;
+  icon?: string;
+  children?: CategoryNode[];
 }
 
 interface ForumHomeProps {
@@ -16,61 +19,151 @@ interface ForumHomeProps {
   onCategorySelect: (cat: string | null) => void;
 }
 
+function flattenCategories(tree: CategoryNode[]): CategoryNode[] {
+  let result: CategoryNode[] = [];
+  for (const cat of tree) {
+    if (cat.children && cat.children.length) {
+      result = result.concat(flattenCategories(cat.children));
+    } else {
+      result.push(cat);
+    }
+  }
+  return result;
+}
+
 export default function ForumHome({ selectedCategory, onCategorySelect }: ForumHomeProps) {
   const [threads, setThreads] = useState<Thread[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryNode[]>([]);
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [loadingThreads, setLoadingThreads] = useState(true);
   const [errorThreads, setErrorThreads] = useState('');
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [editThread, setEditThread] = useState<Thread | null>(null);
+  const [deleteThreadId, setDeleteThreadId] = useState<string | null>(null);
+  const { user } = useAuth();
 
-  // Fetch threads from backend API
+  // Fetch kategori tree dari backend
   useEffect(() => {
-    setLoadingThreads(true);
-    setErrorThreads('');
-    fetch('http://localhost:3000/threads')
+    setLoadingCategories(true);
+    fetch('http://localhost:3000/categories')
       .then(res => {
-        if (!res.ok) throw new Error('Gagal mengambil data thread');
+        if (!res.ok) throw new Error('Gagal mengambil kategori');
         return res.json();
       })
       .then(data => {
-        setThreads(Array.isArray(data) ? data : []);
+        setCategories(Array.isArray(data) ? data : []);
+        setLoadingCategories(false);
+      })
+      .catch(err => {
+        setLoadingCategories(false);
+      });
+  }, []);
+
+  // Fetch threads dari backend
+  useEffect(() => {
+    setLoadingThreads(true);
+    setErrorThreads('');
+    let url = 'http://localhost:3000/threads';
+    if (selectedCategory) url += `?categoryId=${selectedCategory}`;
+    fetch(url)
+      .then(res => res.json())
+      .then(json => {
+        if (!json.success) throw new Error(json.error || 'Gagal mengambil thread');
+        setThreads(Array.isArray(json.data) ? json.data : []);
         setLoadingThreads(false);
       })
       .catch(err => {
-        setErrorThreads('Gagal mengambil data thread');
+        setErrorThreads(err.message || 'Gagal mengambil data thread');
         setLoadingThreads(false);
       });
-  }, [isCreateModalOpen]); // refresh threads when modal close (after creation)
+  }, [isCreateModalOpen, selectedCategory]);
 
-  // Fetch categories (bisa dari backend jika sudah ada, di sini hardcode agar tidak error)
-  useEffect(() => {
-    // TODO: Ganti ke fetch('http://localhost:3000/categories') jika sudah ada endpoint categories
-    setCategories([
-      { id: "c1", name: "General", description: "Diskusi umum dan pengumuman.", color: "#4a74ff" },
-      { id: "c2", name: "Blockchain", description: "Diskusi seputar teknologi blockchain.", color: "#ff9800" },
-      { id: "c3", name: "AI & Machine Learning", description: "AI, ML, dan Data Science.", color: "#8a6cff" }
-    ]);
-    setLoadingCategories(false);
-  }, []);
+  // Hapus thread
+    const handleDeleteThread = async (threadId: string) => {
+    if (!user || !user.id) {
+      alert("Harus login untuk hapus thread.");
+      return;
+    }
+    if (!window.confirm('Yakin ingin menghapus thread ini?')) return;
+    try {
+      const res = await fetch(`http://localhost:3000/threads/${threadId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ author: { id: user.id, role: user.role } })
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Gagal hapus thread');
+      // Refresh thread list
+      setThreads(threads.filter(t => t.id !== threadId));
+    } catch (err: any) {
+      alert(err.message || 'Gagal hapus thread');
+    }
+  };
 
-  // Filter threads by selected category
-  const filteredThreads = useMemo(() => {
-    if (!selectedCategory) return threads;
-    return threads.filter(thread => thread?.category?.id === selectedCategory);
-  }, [threads, selectedCategory]);
+  // Simpan edit thread
+  const handleSaveEditThread = async (newData: Partial<Thread>) => {
+    if (!editThread || !user) return;
+    try {
+      const res = await fetch(`http://localhost:3000/threads/${editThread.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...newData,
+          author: { id: user.id, role: user.role }
+        })
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Gagal edit thread');
+      setEditThread(null);
+      setThreads(threads.map(t => t.id === editThread.id ? { ...t, ...json.data } : t));
+    } catch (err: any) {
+      alert(err.message || 'Gagal edit thread');
+    }
+  };
 
-  // Sort: pinned first, then terbaru
-  const sortedThreads = useMemo(() => {
-    return [...filteredThreads].sort((a, b) => {
-      if (a.isPinned && !b.isPinned) return -1;
-      if (!a.isPinned && b.isPinned) return 1;
-      const aUpdate = a.updatedAt ? new Date(a.updatedAt).getTime() : new Date(a.createdAt).getTime();
-      const bUpdate = b.updatedAt ? new Date(b.updatedAt).getTime() : new Date(b.createdAt).getTime();
-      return bUpdate - aUpdate;
-    });
-  }, [filteredThreads]);
+  return (
+    <main className="max-w-5xl mx-auto px-2 sm:px-4 py-4 min-h-screen">
+      {/* ... existing UI */}
+      <section className="space-y-4">
+        {selectedThread ? (
+          <ThreadView thread={selectedThread} onBack={handleBackToThreads} />
+        ) : loadingThreads ? (
+          // ... loading UI
+        ) : errorThreads ? (
+          // ... error UI
+        ) : threads.length > 0 ? (
+          threads.map((thread) => (
+            <ThreadCard
+              key={thread.id}
+              thread={thread}
+              onThreadClick={handleThreadClick}
+              onEditThread={setEditThread}
+              onDeleteThread={handleDeleteThread}
+            />
+          ))
+        ) : (
+          // ... empty UI
+        )}
+      </section>
+      {/* Modal Create Thread */}
+      <CreateThreadModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        categories={flatCategories}
+      />
+      {/* Modal Edit Thread */}
+      {editThread && (
+        <EditThreadModal
+          thread={editThread}
+          categories={flatCategories}
+          onSave={handleSaveEditThread}
+          onClose={() => setEditThread(null)}
+        />
+      )}
+
+  // Flatten subkategori untuk dropdown filter
+  const flatCategories = useMemo(() => flattenCategories(categories), [categories]);
 
   const handleThreadClick = (thread: Thread) => {
     setSelectedThread(thread);
@@ -87,13 +180,13 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
       <div className="mb-8">
         <h2 className="text-2xl font-extrabold mb-2 text-[#181818] dark:text-white">
           {selectedCategory
-            ? categories.find(c => c.id === selectedCategory)?.name
+            ? flatCategories.find(c => c.id === selectedCategory)?.name
             : 'All Threads'
           }
         </h2>
         <p className="text-[#4a74ff]">
           {selectedCategory
-            ? categories.find(c => c.id === selectedCategory)?.description
+            ? flatCategories.find(c => c.id === selectedCategory)?.description
             : 'Diskusi dan partisipasi semua topik'
           }
         </p>
@@ -105,18 +198,18 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
             <span className="text-sm text-[#4a74ff]">Loading categories...</span>
           ) : (
             <select
-              className="border rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-[#181818] text-[#4a74ff] border-[#282828] transition w-[160px]"
+              className="border rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-[#181818] text-[#4a74ff] border-[#282828] transition w-[180px]"
               onChange={e => onCategorySelect(e.target.value || null)}
               value={selectedCategory || ""}
               aria-label="Filter kategori"
             >
-              <option value="">All Categories</option>
-              {categories.map(cat => (
+              <option value="">All Subcategories</option>
+              {flatCategories.map(cat => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>
           )}
-          <span className="text-sm text-[#4a74ff]">{sortedThreads.length} threads</span>
+          <span className="text-sm text-[#4a74ff]">{threads.length} threads</span>
         </div>
         <button
           onClick={() => setIsCreateModalOpen(true)}
@@ -138,8 +231,8 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
             <h3 className="text-lg font-semibold mb-2 text-white">Error</h3>
             <p className="text-[#4a74ff] mb-4">{errorThreads}</p>
           </div>
-        ) : sortedThreads.length > 0 ? (
-          sortedThreads.map((thread) => (
+        ) : threads.length > 0 ? (
+          threads.map((thread) => (
             <ThreadCard
               key={thread.id}
               thread={thread}
@@ -151,7 +244,7 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
             <h3 className="text-lg font-semibold mb-2 text-white">No threads found</h3>
             <p className="text-[#4a74ff] mb-4">
               {selectedCategory
-                ? 'Belum ada thread di kategori ini. Jadilah yang pertama!'
+                ? 'Belum ada thread di subkategori ini. Jadilah yang pertama!'
                 : 'Tidak ada thread yang cocok dengan filter.'}
             </p>
             <button
@@ -167,8 +260,8 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
       <CreateThreadModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        categories={categories}
+        categories={flatCategories}
       />
     </main>
   );
-} 
+}

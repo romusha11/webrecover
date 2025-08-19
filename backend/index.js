@@ -245,7 +245,7 @@ app.post('/users/:userId/transfer', (req, res) => {
   res.json({ balance: user.balance, toUserBalance: toUser.balance });
 });
 
-// THREADS - sinkronisasi properti
+// THREADS - CRUD PRODUCTION READY
 const THREADS_FILE = './threads.json';
 function loadThreads() {
   if (!fs.existsSync(THREADS_FILE)) return [];
@@ -255,42 +255,127 @@ function loadThreads() {
 function saveThreads(threads) {
   fs.writeFileSync(THREADS_FILE, JSON.stringify(threads, null, 2));
 }
-app.get('/threads', (req, res) => { res.json(loadThreads()); });
-app.post('/threads', (req, res) => {
-  const {
-    title,
-    content,
-    author,
-    category,
-    tags,
-    isPinned,
-    isLocked,
-    votes,
-    createdAt,
-    updatedAt
-  } = req.body;
 
-  if (!title || !content || !author || !category) {
-    return res.status(400).json({ error: 'Semua field wajib diisi' });
+// Helper: get user by id
+function getUserById(userId) {
+  const users = loadUsers();
+  return users.find(u => u.id == userId);
+}
+
+// Helper: find subcategory (recursive)
+function findSubcategory(categoryTree, id) {
+  for (const cat of categoryTree) {
+    if (cat.id === id) return cat;
+    if (cat.children && cat.children.length) {
+      const found = findSubcategory(cat.children, id);
+      if (found) return found;
+    }
   }
+  return null;
+}
 
-  const threads = loadThreads();
+// GET /threads?categoryId=...
+app.get('/threads', (req, res) => {
+  const { categoryId } = req.query;
+  let threads = loadThreads();
+  if (categoryId) {
+    threads = threads.filter(t => t.categoryId === categoryId);
+  }
+  // Sort: terbaru paling atas
+  threads.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  res.json({ success: true, data: threads });
+});
+
+// POST /threads
+app.post('/threads', (req, res) => {
+  const { title, content, categoryId, tags, author } = req.body;
+  if (!title || !content || !categoryId || !author || !author.id) {
+    return res.status(400).json({ success: false, error: 'Semua field wajib diisi' });
+  }
+  // Validasi kategoriId hanya boleh subkategori (tidak root)
+  const categories = loadCategories();
+  const catObj = findSubcategory(categories, categoryId);
+  if (!catObj) {
+    return res.status(400).json({ success: false, error: 'Kategori tidak valid' });
+  }
+  if (catObj.children && catObj.children.length > 0) {
+    return res.status(400).json({ success: false, error: 'Tidak boleh post di root kategori, hanya subkategori' });
+  }
+  // Validasi user
+  const userObj = getUserById(author.id);
+  if (!userObj) {
+    return res.status(401).json({ success: false, error: 'User tidak ditemukan / belum login' });
+  }
+  // Build thread
   const newThread = {
-    id: Date.now(),
-    title,
-    content,
-    author,
-    category,
-    tags: tags || [],
-    isPinned: isPinned || false,
-    isLocked: isLocked || false,
-    votes: votes || 0,
-    createdAt: createdAt || new Date().toISOString(),
-    updatedAt: updatedAt || new Date().toISOString()
+    id: Date.now().toString(),
+    title: title.trim(),
+    content: content.trim(),
+    categoryId: catObj.id,
+    category: {
+      id: catObj.id,
+      name: catObj.name,
+      icon: catObj.icon,
+      color: catObj.color,
+      description: catObj.description,
+    },
+    tags: Array.isArray(tags) ? tags : [],
+    author: {
+      id: userObj.id,
+      username: userObj.username,
+      name: userObj.name,
+      avatar: userObj.avatar,
+      email: userObj.email,
+      role: userObj.role,
+      reputation: userObj.reputation,
+      joinDate: userObj.joinDate,
+    },
+    isPinned: false,
+    isLocked: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
+  const threads = loadThreads();
   threads.push(newThread);
   saveThreads(threads);
-  res.json(newThread);
+  res.json({ success: true, data: newThread });
+});
+
+// PUT /threads/:id
+app.put('/threads/:id', (req, res) => {
+  const { id } = req.params;
+  const { title, content, tags, author } = req.body;
+  if (!author || !author.id) return res.status(401).json({ success: false, error: 'User belum login' });
+  const threads = loadThreads();
+  const idx = threads.findIndex(t => t.id === id);
+  if (idx === -1) return res.status(404).json({ success: false, error: 'Thread tidak ditemukan' });
+  // Hanya author atau admin bisa edit
+  if (threads[idx].author.id !== author.id && author.role !== 'admin') {
+    return res.status(403).json({ success: false, error: 'Tidak punya hak edit thread ini' });
+  }
+  threads[idx].title = title ? title.trim() : threads[idx].title;
+  threads[idx].content = content ? content.trim() : threads[idx].content;
+  threads[idx].tags = Array.isArray(tags) ? tags : threads[idx].tags;
+  threads[idx].updatedAt = new Date().toISOString();
+  saveThreads(threads);
+  res.json({ success: true, data: threads[idx] });
+});
+
+// DELETE /threads/:id
+app.delete('/threads/:id', (req, res) => {
+  const { id } = req.params;
+  const { author } = req.body; // frontend kirim author.id di body
+  if (!author || !author.id) return res.status(401).json({ success: false, error: 'User belum login' });
+  const threads = loadThreads();
+  const idx = threads.findIndex(t => t.id === id);
+  if (idx === -1) return res.status(404).json({ success: false, error: 'Thread tidak ditemukan' });
+  // Hanya author atau admin bisa hapus
+  if (threads[idx].author.id !== author.id && author.role !== 'admin') {
+    return res.status(403).json({ success: false, error: 'Tidak punya hak hapus thread ini' });
+  }
+  threads.splice(idx, 1);
+  saveThreads(threads);
+  res.json({ success: true });
 });
 
 // REPLIES

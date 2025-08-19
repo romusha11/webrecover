@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { X, Tag } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { X } from 'lucide-react';
+import { Thread } from '../types/forum';
 
 interface CategoryNode {
   id: string;
@@ -10,23 +10,21 @@ interface CategoryNode {
   icon?: string;
 }
 
-interface CreateThreadModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface EditThreadModalProps {
+  thread: Thread;
   categories: CategoryNode[];
+  onSave: (data: Partial<Thread>) => void;
+  onClose: () => void;
 }
 
-export default function CreateThreadModal({ isOpen, onClose, categories }: CreateThreadModalProps) {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
+export default function EditThreadModal({ thread, categories, onSave, onClose }: EditThreadModalProps) {
+  const [title, setTitle] = useState(thread.title);
+  const [content, setContent] = useState(thread.content);
+  const [tags, setTags] = useState<string[]>(thread.tags || []);
   const [tagInput, setTagInput] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
 
-  // Add tag (max 5, enter key)
   const handleAddTag = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && tagInput.trim() && tags.length < 5) {
       e.preventDefault();
@@ -34,76 +32,32 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
       setTagInput('');
     }
   };
-
   const handleRemoveTag = (index: number) => {
     setTags(tags.filter((_, i) => i !== index));
   };
 
-  // Submit create thread
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!title.trim() || !content.trim() || !selectedCategory) {
-      setError("Semua field wajib diisi.");
-      return;
-    }
-    if (!user || !user.id) {
-      setError("Harus login untuk membuat thread.");
+    if (!title.trim() || !content.trim()) {
+      setError("Title dan content wajib diisi.");
       return;
     }
     setLoading(true);
-    try {
-      // POST ke backend
-      const res = await fetch('http://localhost:3000/threads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: title.trim(),
-          content: content.trim(),
-          categoryId: selectedCategory,
-          tags,
-          author: {
-            id: user.id,
-            username: user.username,
-            name: user.name,
-            avatar: user.avatar,
-            email: user.email,
-            role: user.role,
-            reputation: user.reputation,
-            joinDate: user.joinDate,
-          }
-        }),
-      });
-      const json = await res.json();
-      if (!json.success) {
-        setError(json.error || 'Gagal membuat thread');
-        setLoading(false);
-        return;
-      }
-
-      // Reset form & tutup modal
-      setTitle('');
-      setContent('');
-      setSelectedCategory('');
-      setTags([]);
-      setTagInput('');
-      setError('');
-      setLoading(false);
-      onClose();
-    } catch (err) {
-      setError('Gagal membuat thread');
-      setLoading(false);
-    }
+    onSave({
+      title: title.trim(),
+      content: content.trim(),
+      tags
+    });
+    setLoading(false);
   };
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col border border-gray-200">
         {/* Header modal */}
         <div className="flex items-center justify-between p-5 border-b border-gray-200">
-          <h2 className="text-xl font-extrabold text-gray-900">Create New Thread</h2>
+          <h2 className="text-xl font-extrabold text-gray-900">Edit Thread</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -115,15 +69,13 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-bold text-gray-700 mb-1">
+            <label className="block text-sm font-bold text-gray-700 mb-1">
               Title *
             </label>
             <input
               type="text"
-              id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Judul thread"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 font-semibold"
               required
               autoFocus
@@ -131,34 +83,12 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
             />
           </div>
           <div>
-            <label htmlFor="category" className="block text-sm font-bold text-gray-700 mb-1">
-              Subcategory *
-            </label>
-            <select
-              id="category"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 font-semibold"
-              required
-              disabled={loading}
-            >
-              <option value="">Pilih subkategori</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="content" className="block text-sm font-bold text-gray-700 mb-1">
+            <label className="block text-sm font-bold text-gray-700 mb-1">
               Content *
             </label>
             <textarea
-              id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Tulis isi thread, pertanyaan, diskusi..."
               rows={8}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 font-semibold resize-none"
               required
@@ -167,7 +97,7 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
             <p className="text-xs text-gray-400 mt-1">Markdown supported</p>
           </div>
           <div>
-            <label htmlFor="tags" className="block text-sm font-bold text-gray-700 mb-1">
+            <label className="block text-sm font-bold text-gray-700 mb-1">
               Tags (opsional)
             </label>
             <div className="border border-gray-300 rounded-lg p-3">
@@ -215,11 +145,11 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
             </button>
             <button
               type="submit"
-              disabled={!title.trim() || !content.trim() || !selectedCategory || loading}
+              disabled={!title.trim() || !content.trim() || loading}
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-6 py-2 rounded-lg font-bold transition"
-              aria-label="Buat thread"
+              aria-label="Simpan Perubahan"
             >
-              {loading ? 'Creating...' : 'Create Thread'}
+              {loading ? 'Saving...' : 'Simpan Perubahan'}
             </button>
           </div>
         </form>

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { mockThreads, mockReplies } from '../data/mockData';
 import { Thread, Reply } from '../types/forum';
 
 export default function MyActivity() {

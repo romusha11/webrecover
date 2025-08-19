@@ -1,5 +1,4 @@
 import React from 'react';
-import { mockUsers, mockThreads, mockCategories, mockReplies, mockTransactions } from '../data/mockData';
 import { BarChart2, User, MessageSquare, Tag, ArrowUpRight, TrendingUp, Star, Activity, DollarSign } from 'lucide-react';
 
 // Dummy chart data
