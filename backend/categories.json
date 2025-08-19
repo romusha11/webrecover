@@ -1,0 +1,38 @@
+[
+  {
+    "id": "work-service",
+    "name": "Work & Service",
+    "icon": "Briefcase",
+    "children": [
+      { "id": "programming", "name": "Programming", "icon": "Code", "children": [] },
+      { "id": "social-network-promotion", "name": "Social Network Promotion", "icon": "Share", "children": [] },
+      { "id": "hosting-shop", "name": "Hosting, Shop Rental", "icon": "Server", "children": [] },
+      { "id": "design", "name": "Design", "icon": "PenTool", "children": [] },
+      { "id": "account-boost", "name": "Account Boost", "icon": "TrendingUp", "children": [] },
+      { "id": "top-up-balance", "name": "Top Up Balance", "icon": "DollarSign", "children": [] },
+      { "id": "shipping-refund", "name": "Shipping, Refund", "icon": "Truck", "children": [] },
+      { "id": "studies", "name": "Studies", "icon": "BookOpen", "children": [] },
+      { "id": "sms-receiving", "name": "SMS Receiving", "icon": "Smartphone", "children": [] },
+      { "id": "tasks-for-money", "name": "Tasks for Money", "icon": "ClipboardCheck", "children": [] },
+      { "id": "adverting", "name": "Adverting", "icon": "Megaphone", "children": [] },
+      { "id": "looking-for-job", "name": "Looking for a Job", "icon": "UserSearch", "children": [] }
+    ]
+  },
+  {
+    "id": "trade",
+    "name": "Trade",
+    "icon": "ShoppingCart",
+    "children": [
+      {
+        "id": "games",
+        "name": "Games",
+        "icon": "Gamepad2",
+        "children": [
+          { "id": "supercell", "name": "Supercell", "icon": "Shield", "children": [] },
+          { "id": "mihoyo", "name": "miHoYo", "icon": "Sparkles", "children": [] },
+          { "id": "moonton", "name": "Moonton", "icon": "Rocket", "children": [] }
+        ]
+      }
+    ]
+  }
+]

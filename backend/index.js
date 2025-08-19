@@ -29,6 +29,10 @@ function generateParaphrase() {
   return p;
 }
 
+ function hashWithSalt(value, salt) {
+  return crypto.pbkdf2Sync(value, salt, 10000, 64, 'sha512').toString('hex');
+}
+
 // REGISTER user multi-entitas
 app.post('/users', async (req, res) => {
   const { username, email, password, userAgent, screen } = req.body;
@@ -44,7 +48,9 @@ app.post('/users', async (req, res) => {
     return res.status(400).json({ error: 'Email sudah terpakai' });
 
   // Generate paraphrase
-  const paraphrase = generateParaphrase();
+  const paraphrasePlain = generateParaphrase();
+  const paraphraseSalt = crypto.randomBytes(8).toString('hex');
+  const paraphraseHash = hashWithSalt(paraphrasePlain, paraphraseSalt);
 
   // Generate fingerprint
   const salt = crypto.randomBytes(8).toString('hex');
@@ -65,8 +71,9 @@ app.post('/users', async (req, res) => {
     id: Date.now(),
     username,
     email,
-    password: hashed,
-    paraphrase,
+    password: hashPassword(password),
+    paraphraseHash,
+    paraphraseSalt,
     bookmarks: [],
     balance: 0,
     totpSecret,
@@ -86,7 +93,7 @@ app.post('/users', async (req, res) => {
     totpSecret,
     fingerprint,
     salt,
-    paraphrase
+    paraphrase: paraphrasePlain
   });
 });
 
@@ -121,9 +128,14 @@ app.post('/bind-device', (req, res) => {
 
   const users = loadUsers();
   const user = users.find(
-    u => u.email === email && u.paraphrase === paraphrase
-  );
+    u => u.email === email);
+
   if (!user) return res.status(404).json({ error: 'User/paraphrase tidak cocok' });
+
+  // Verifikasi paraphrase
+  const paraphraseCheck = hashWithSalt(paraphrase, user.paraphraseSalt);
+  if (paraphraseCheck !== user.paraphraseHash)
+  return res.status(400).json({ error: 'Paraphrase salah' });
 
   // Generate new fingerprint untuk perangkat ini
   const salt = crypto.randomBytes(8).toString('hex');
@@ -331,6 +343,16 @@ app.post('/notifications', (req, res) => {
   notifs.push(newNotif);
   saveNotifs(notifs);
   res.json(newNotif);
+});
+
+  const CATEGORIES_FILE = './categories.json';
+function loadCategories() {
+  if (!fs.existsSync(CATEGORIES_FILE)) return [];
+  const data = fs.readFileSync(CATEGORIES_FILE, 'utf8');
+  return data ? JSON.parse(data) : [];
+}
+app.get('/categories', (req, res) => {
+  res.json(loadCategories());
 });
 
 // Test endpoint
