@@ -7,6 +7,7 @@ export default function ThreadDetail() {
   const navigate = useNavigate();
 
   // Get thread detail
+  // NOTE: Replace mockThreads with fetch API in production
   const thread = mockThreads.find(t => t.id === threadId);
   if (!thread) return (
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -23,6 +24,7 @@ export default function ThreadDetail() {
   );
 
   // Replies
+  // NOTE: Replace mockReplies with fetch API in production
   const [replies, setReplies] = useState(
     mockReplies.filter(r => r.threadId === thread.id)
   );
@@ -33,7 +35,8 @@ export default function ThreadDetail() {
   const [editingContent, setEditingContent] = useState('');
 
   // Dummy user login
-  const user = mockUsers[0]; // TODO: replace with real user context
+  // NOTE: Replace mockUsers[0] with actual user context
+  const user = mockUsers[0];
 
   // Reply submit
   const handleReply = (e: React.FormEvent) => {
@@ -99,9 +102,8 @@ export default function ThreadDetail() {
 
   // Edit/hapus thread (dummy, hanya author/admin)
   const isThreadOwner = user.username === thread.author.username || user.role === 'admin';
-  const handleEditThread = () => {/* Integrasi edit thread modal/route */};
+  const handleEditThread = () => {};
   const handleDeleteThread = () => {
-    // Integrasi delete thread
     navigate('/forum');
   };
 
@@ -114,8 +116,6 @@ export default function ThreadDetail() {
         >
           <ArrowLeft size={18} /> Kembali ke forum
         </button>
-
-        {/* Thread header */}
         <div className="mb-4 pb-4 border-b border-gray-200">
           <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
             <div className="flex gap-3 items-center">
@@ -174,8 +174,6 @@ export default function ThreadDetail() {
           </div>
           <div className="text-base text-gray-800 mt-3 whitespace-pre-line">{thread.content}</div>
         </div>
-
-        {/* Reply list */}
         <div className="mb-8">
           <div className="font-black text-lg text-blue-700 mb-2">Replies</div>
           <ul className="space-y-4">
@@ -205,7 +203,6 @@ export default function ThreadDetail() {
                     <div className="text-sm text-gray-800 mt-1 whitespace-pre-line">{r.content}</div>
                   )}
                 </div>
-                {/* Aksi edit/hapus reply */}
                 {(user.username === r.author.username || user.role === 'admin') && editingReplyId !== r.id && (
                   <div className="flex flex-col gap-2 items-end">
                     <button
@@ -230,8 +227,6 @@ export default function ThreadDetail() {
             )}
           </ul>
         </div>
-
-        {/* Reply form */}
         <div className="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-5">
           <form onSubmit={handleReply} className="flex flex-col gap-3">
             <label className="font-bold text-blue-700 flex gap-2 items-center mb-1">
@@ -239,7 +234,7 @@ export default function ThreadDetail() {
             </label>
             <textarea
               value={replyContent}
-              onChange={e => setReplyContent(e.target.value)}
+              onChange={(e) => setReplyContent(e.target.value)}
               rows={2}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 font-semibold resize-none"
               required

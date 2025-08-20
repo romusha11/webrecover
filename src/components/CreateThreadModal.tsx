@@ -53,7 +53,6 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
     }
     setLoading(true);
     try {
-      // POST ke backend
       const res = await fetch('http://localhost:3000/threads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,8 +79,6 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
         setLoading(false);
         return;
       }
-
-      // Reset form & tutup modal
       setTitle('');
       setContent('');
       setSelectedCategory('');
@@ -101,7 +98,6 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col border border-gray-200">
-        {/* Header modal */}
         <div className="flex items-center justify-between p-5 border-b border-gray-200">
           <h2 className="text-xl font-extrabold text-gray-900">Create New Thread</h2>
           <button
@@ -112,7 +108,6 @@ export default function CreateThreadModal({ isOpen, onClose, categories }: Creat
             <X size={22} />
           </button>
         </div>
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-6">
           <div>
             <label htmlFor="title" className="block text-sm font-bold text-gray-700 mb-1">

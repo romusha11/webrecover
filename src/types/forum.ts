@@ -1,37 +1,14 @@
-export interface User {
+// FINAL SINKRONISASI DATA FORUM
+
+export interface Author {
   id: string;
   username: string;
+  name: string;
   avatar: string;
+  email: string;
+  role: string;
   reputation: number;
   joinDate: string;
-  isOnline: boolean;
-}
-
-export interface Thread {
-  id: string;
-  title: string;
-  content: string;
-  author: User;
-  category: Category;
-  createdAt: string;
-  updatedAt: string;
-  votes: number;
-  replyCount: number;
-  isLocked: boolean;
-  isPinned: boolean;
-  tags: string[];
-  replies: Reply[];
-}
-
-export interface Reply {
-  id: string;
-  content: string;
-  author: User;
-  threadId: string;
-  parentId?: string;
-  createdAt: string;
-  votes: number;
-  replies: Reply[];
 }
 
 export interface Category {
@@ -39,6 +16,28 @@ export interface Category {
   name: string;
   description: string;
   color: string;
-  threadCount: number;
   icon: string;
+  children?: Category[];
+}
+
+export interface Thread {
+  id: string;
+  title: string;
+  content: string;
+  author: Author;
+  category: Category;
+  createdAt: string;
+  updatedAt: string;
+  isLocked: boolean;
+  isPinned: boolean;
+  tags: string[];
+}
+
+export interface Reply {
+  id: string;
+  content: string;
+  author: Author;
+  threadId: string;
+  parentId?: string;
+  createdAt: string;
 }

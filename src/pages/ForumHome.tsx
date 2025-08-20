@@ -4,6 +4,7 @@ import ThreadView from '../components/ThreadView';
 import CreateThreadModal from '../components/CreateThreadModal';
 import { Thread } from '../types/forum';
 import EditThreadModal from '../components/EditThreadModal';
+import { useAuth } from '../context/AuthContext';
 
 interface CategoryNode {
   id: string;
@@ -40,8 +41,10 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
   const [errorThreads, setErrorThreads] = useState('');
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [editThread, setEditThread] = useState<Thread | null>(null);
-  const [deleteThreadId, setDeleteThreadId] = useState<string | null>(null);
   const { user } = useAuth();
+
+  // Flatten subkategori untuk dropdown filter
+  const flatCategories = useMemo(() => flattenCategories(categories), [categories]);
 
   // Fetch kategori tree dari backend
   useEffect(() => {
@@ -55,7 +58,7 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
         setCategories(Array.isArray(data) ? data : []);
         setLoadingCategories(false);
       })
-      .catch(err => {
+      .catch(() => {
         setLoadingCategories(false);
       });
   }, []);
@@ -80,7 +83,7 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
   }, [isCreateModalOpen, selectedCategory]);
 
   // Hapus thread
-    const handleDeleteThread = async (threadId: string) => {
+  const handleDeleteThread = async (threadId: string) => {
     if (!user || !user.id) {
       alert("Harus login untuk hapus thread.");
       return;
@@ -94,7 +97,6 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Gagal hapus thread');
-      // Refresh thread list
       setThreads(threads.filter(t => t.id !== threadId));
     } catch (err: any) {
       alert(err.message || 'Gagal hapus thread');
@@ -122,49 +124,6 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
     }
   };
 
-  return (
-    <main className="max-w-5xl mx-auto px-2 sm:px-4 py-4 min-h-screen">
-      {/* ... existing UI */}
-      <section className="space-y-4">
-        {selectedThread ? (
-          <ThreadView thread={selectedThread} onBack={handleBackToThreads} />
-        ) : loadingThreads ? (
-          // ... loading UI
-        ) : errorThreads ? (
-          // ... error UI
-        ) : threads.length > 0 ? (
-          threads.map((thread) => (
-            <ThreadCard
-              key={thread.id}
-              thread={thread}
-              onThreadClick={handleThreadClick}
-              onEditThread={setEditThread}
-              onDeleteThread={handleDeleteThread}
-            />
-          ))
-        ) : (
-          // ... empty UI
-        )}
-      </section>
-      {/* Modal Create Thread */}
-      <CreateThreadModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        categories={flatCategories}
-      />
-      {/* Modal Edit Thread */}
-      {editThread && (
-        <EditThreadModal
-          thread={editThread}
-          categories={flatCategories}
-          onSave={handleSaveEditThread}
-          onClose={() => setEditThread(null)}
-        />
-      )}
-
-  // Flatten subkategori untuk dropdown filter
-  const flatCategories = useMemo(() => flattenCategories(categories), [categories]);
-
   const handleThreadClick = (thread: Thread) => {
     setSelectedThread(thread);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -176,7 +135,6 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
 
   return (
     <main className="max-w-5xl mx-auto px-2 sm:px-4 py-4 min-h-screen">
-      {/* Header: Kategori & Filter */}
       <div className="mb-8">
         <h2 className="text-2xl font-extrabold mb-2 text-[#181818] dark:text-white">
           {selectedCategory
@@ -191,7 +149,6 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
           }
         </p>
       </div>
-      {/* Filter & New Thread */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mb-6 p-4 rounded-lg border border-gray-200 bg-[#181818] border-[#222]">
         <div className="flex items-center gap-4 w-full sm:w-auto">
           {loadingCategories ? (
@@ -218,7 +175,6 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
           New Thread
         </button>
       </div>
-      {/* List Thread / Thread View */}
       <section className="space-y-4">
         {selectedThread ? (
           <ThreadView thread={selectedThread} onBack={handleBackToThreads} />
@@ -237,6 +193,8 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
               key={thread.id}
               thread={thread}
               onThreadClick={handleThreadClick}
+              onEditThread={setEditThread}
+              onDeleteThread={handleDeleteThread}
             />
           ))
         ) : (
@@ -256,12 +214,19 @@ export default function ForumHome({ selectedCategory, onCategorySelect }: ForumH
           </div>
         )}
       </section>
-      {/* Modal Create Thread */}
       <CreateThreadModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         categories={flatCategories}
       />
+      {editThread && (
+        <EditThreadModal
+          thread={editThread}
+          categories={flatCategories}
+          onSave={handleSaveEditThread}
+          onClose={() => setEditThread(null)}
+        />
+      )}
     </main>
   );
 }
